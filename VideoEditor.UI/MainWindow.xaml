@@ -35,13 +35,99 @@
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" Style="{StaticResource CardBorderStyle}">
-                <ContentControl Content="{Binding DashboardViewModel}">
-                    <ContentControl.ContentTemplate>
-                        <DataTemplate DataType="{x:Type viewModels:DashboardViewModel}">
-                            <views:DashboardView />
-                        </DataTemplate>
-                    </ContentControl.ContentTemplate>
-                </ContentControl>
+                <TabControl>
+                    <TabItem Header="Dashboard">
+                        <ContentControl Content="{Binding DashboardViewModel}">
+                            <ContentControl.ContentTemplate>
+                                <DataTemplate DataType="{x:Type viewModels:DashboardViewModel}">
+                                    <views:DashboardView />
+                                </DataTemplate>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+                    </TabItem>
+
+                    <TabItem Header="Cut/Trim">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="Cut/Trim" />
+                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.TrimInputPath, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Output" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.TrimOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+                            <WrapPanel Margin="0,8,0,0">
+                                <TextBlock VerticalAlignment="Center" Text="Start" />
+                                <TextBox Width="100" Margin="6,0,8,0" Text="{Binding ModulesWorkbenchViewModel.TrimStart, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock VerticalAlignment="Center" Text="End" />
+                                <TextBox Width="100" Margin="6,0,0,0" Text="{Binding ModulesWorkbenchViewModel.TrimEnd, UpdateSourceTrigger=PropertyChanged}" />
+                            </WrapPanel>
+                            <Button Margin="0,12,0,0"
+                                    HorizontalAlignment="Left"
+                                    Command="{Binding ModulesWorkbenchViewModel.RunTrimCommand}"
+                                    Content="Run Cut/Trim" />
+                            <TextBlock Margin="0,8,0,0"
+                                       Style="{StaticResource StatusInfoTextBlockStyle}"
+                                       TextWrapping="Wrap"
+                                       Text="{Binding ModulesWorkbenchViewModel.TrimStatus}" />
+                        </StackPanel>
+                    </TabItem>
+
+                    <TabItem Header="Join/Concat">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="Join/Concat" />
+                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input A" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.ConcatInputA, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input B" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.ConcatInputB, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Output" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.ConcatOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button Margin="0,12,0,0"
+                                    HorizontalAlignment="Left"
+                                    Command="{Binding ModulesWorkbenchViewModel.RunConcatCommand}"
+                                    Content="Run Join/Concat" />
+                            <TextBlock Margin="0,8,0,0"
+                                       Style="{StaticResource StatusInfoTextBlockStyle}"
+                                       TextWrapping="Wrap"
+                                       Text="{Binding ModulesWorkbenchViewModel.ConcatStatus}" />
+                        </StackPanel>
+                    </TabItem>
+
+                    <TabItem Header="Split A/V">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="Split A/V" />
+                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.SplitInputPath, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Audio Output" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.AudioOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Video Output" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.VideoOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button Margin="0,12,0,0"
+                                    HorizontalAlignment="Left"
+                                    Command="{Binding ModulesWorkbenchViewModel.RunSplitAvCommand}"
+                                    Content="Run Split A/V" />
+                            <TextBlock Margin="0,8,0,0"
+                                       Style="{StaticResource StatusInfoTextBlockStyle}"
+                                       TextWrapping="Wrap"
+                                       Text="{Binding ModulesWorkbenchViewModel.SplitStatus}" />
+                        </StackPanel>
+                    </TabItem>
+
+                    <TabItem Header="Convert">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="Convert" />
+                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.ConvertInputPath, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Output" />
+                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.ConvertOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button Margin="0,12,0,0"
+                                    HorizontalAlignment="Left"
+                                    Command="{Binding ModulesWorkbenchViewModel.RunConvertCommand}"
+                                    Content="Run Convert" />
+                            <TextBlock Margin="0,8,0,0"
+                                       Style="{StaticResource StatusInfoTextBlockStyle}"
+                                       TextWrapping="Wrap"
+                                       Text="{Binding ModulesWorkbenchViewModel.ConvertStatus}" />
+                        </StackPanel>
+                    </TabItem>
+                </TabControl>
             </Border>
 
             <Border Grid.Column="2" Style="{StaticResource CardBorderStyle}">

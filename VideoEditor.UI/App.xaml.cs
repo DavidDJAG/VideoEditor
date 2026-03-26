@@ -61,6 +61,8 @@ public partial class App : System.Windows.Application
         services.AddTransient<ProbeViewModel>();
         services.AddTransient<PreviewViewModel>();
         services.AddTransient<QueueViewModel>();
+        services.AddTransient<SplitAvViewModel>();
+        services.AddTransient<ModulesWorkbenchViewModel>();
         services.AddSingleton<SettingsViewModel>();
     }
 }

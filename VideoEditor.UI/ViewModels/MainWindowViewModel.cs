@@ -12,7 +12,8 @@ public sealed class MainWindowViewModel
         ProbeViewModel probeViewModel,
         PreviewViewModel previewViewModel,
         QueueViewModel queueViewModel,
-        SettingsViewModel settingsViewModel)
+        SettingsViewModel settingsViewModel,
+        ModulesWorkbenchViewModel modulesWorkbenchViewModel)
     {
         DashboardViewModel = dashboardViewModel;
         TrimViewModel = trimViewModel;
@@ -22,6 +23,7 @@ public sealed class MainWindowViewModel
         PreviewViewModel = previewViewModel;
         QueueViewModel = queueViewModel;
         SettingsViewModel = settingsViewModel;
+        ModulesWorkbenchViewModel = modulesWorkbenchViewModel;
     }
 
     public string Title => "Video Editor";
@@ -43,4 +45,6 @@ public sealed class MainWindowViewModel
     public QueueViewModel QueueViewModel { get; }
 
     public SettingsViewModel SettingsViewModel { get; }
+
+    public ModulesWorkbenchViewModel ModulesWorkbenchViewModel { get; }
 }
