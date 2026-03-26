@@ -5,6 +5,8 @@ public sealed record OperationParameters(
     string? OutputPath,
     TimeSpan? Start,
     TimeSpan? End,
+    TimeSpan? SubtitleOffset,
+    double SpeedFactor,
     IReadOnlyList<string> AdditionalInputs,
     IReadOnlyDictionary<string, string> Flags,
     EncodingProfile? EncodingProfile,

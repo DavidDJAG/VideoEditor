@@ -44,6 +44,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<TranscodeViewModel>();
         services.AddTransient<ConcatViewModel>();
         services.AddTransient<ProbeViewModel>();
+        services.AddTransient<PreviewViewModel>();
         services.AddTransient<QueueViewModel>();
         services.AddSingleton<SettingsViewModel>();
     }

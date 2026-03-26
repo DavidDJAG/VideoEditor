@@ -10,6 +10,7 @@ public sealed class MainWindowViewModel
         TranscodeViewModel transcodeViewModel,
         ConcatViewModel concatViewModel,
         ProbeViewModel probeViewModel,
+        PreviewViewModel previewViewModel,
         QueueViewModel queueViewModel,
         SettingsViewModel settingsViewModel)
     {
@@ -18,6 +19,7 @@ public sealed class MainWindowViewModel
         TranscodeViewModel = transcodeViewModel;
         ConcatViewModel = concatViewModel;
         ProbeViewModel = probeViewModel;
+        PreviewViewModel = previewViewModel;
         QueueViewModel = queueViewModel;
         SettingsViewModel = settingsViewModel;
     }
@@ -35,6 +37,8 @@ public sealed class MainWindowViewModel
     public ConcatViewModel ConcatViewModel { get; }
 
     public ProbeViewModel ProbeViewModel { get; }
+
+    public PreviewViewModel PreviewViewModel { get; }
 
     public QueueViewModel QueueViewModel { get; }
 
