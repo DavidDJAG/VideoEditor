@@ -4,6 +4,8 @@ namespace VideoEditor.Application.Abstractions;
 
 public interface ICommandBuilder
 {
+    string Build(IFfmpegOperationRequest request);
+
     string BuildTrim(OperationParameters parameters);
 
     string BuildTranscode(OperationParameters parameters);
