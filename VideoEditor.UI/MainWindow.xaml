@@ -65,6 +65,46 @@
                                Foreground="DimGray"
                                TextWrapping="Wrap"
                                Text="{Binding SettingsViewModel.ScanStatus}" />
+
+                    <Separator Margin="0,16,0,12" />
+                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Preview (ffplay)" />
+                    <TextBox Margin="0,8,0,0" Text="{Binding PreviewViewModel.InputPath, UpdateSourceTrigger=PropertyChanged}" />
+                    <WrapPanel Margin="0,8,0,0">
+                        <TextBlock VerticalAlignment="Center" Text="In" />
+                        <TextBox Width="90" Margin="6,0,8,0" Text="{Binding PreviewViewModel.InMarker, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock VerticalAlignment="Center" Text="Out" />
+                        <TextBox Width="90" Margin="6,0,0,0" Text="{Binding PreviewViewModel.OutMarker, UpdateSourceTrigger=PropertyChanged}" />
+                    </WrapPanel>
+                    <WrapPanel Margin="0,8,0,0">
+                        <TextBlock VerticalAlignment="Center" Text="Sub offset" />
+                        <TextBox Width="90" Margin="6,0,8,0" Text="{Binding PreviewViewModel.SubtitleOffset, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock VerticalAlignment="Center" Text="Speed" />
+                        <TextBox Width="60" Margin="6,0,0,0" Text="{Binding PreviewViewModel.SpeedFactor, UpdateSourceTrigger=PropertyChanged}" />
+                    </WrapPanel>
+
+                    <WrapPanel Margin="0,8,0,0">
+                        <TextBlock VerticalAlignment="Center" Text="A" />
+                        <TextBox Width="70" Margin="6,0,4,0" Text="{Binding PreviewViewModel.AStart, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Width="70" Margin="0,0,8,0" Text="{Binding PreviewViewModel.AEnd, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock VerticalAlignment="Center" Text="B" />
+                        <TextBox Width="70" Margin="6,0,4,0" Text="{Binding PreviewViewModel.BStart, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Width="70" Margin="0,0,0,0" Text="{Binding PreviewViewModel.BEnd, UpdateSourceTrigger=PropertyChanged}" />
+                    </WrapPanel>
+
+                    <ComboBox Margin="0,8,0,0"
+                              ItemsSource="{Binding PreviewViewModel.ProbeSeekPoints}"
+                              SelectedItem="{Binding PreviewViewModel.SelectedSeek, Mode=TwoWay}" />
+                    <WrapPanel Margin="0,8,0,0">
+                        <Button Padding="8,4" Margin="0,0,6,0" Command="{Binding PreviewViewModel.LoadProbeCommand}" Content="Probe" />
+                        <Button Padding="8,4" Margin="0,0,6,0" Command="{Binding PreviewViewModel.PlaySelectionCommand}" Content="Play I/O" />
+                        <Button Padding="8,4" Margin="0,0,6,0" Command="{Binding PreviewViewModel.PlayAbCommand}" Content="Play A/B" />
+                        <Button Padding="8,4" Margin="0,0,6,0" Command="{Binding PreviewViewModel.QuickSeekCommand}" Content="Quick seek" />
+                        <Button Padding="8,4" Command="{Binding PreviewViewModel.StopCommand}" Content="Stop" />
+                    </WrapPanel>
+                    <TextBlock Margin="0,8,0,0"
+                               Foreground="DimGray"
+                               TextWrapping="Wrap"
+                               Text="{Binding PreviewViewModel.Status}" />
                 </StackPanel>
             </Border>
         </Grid>

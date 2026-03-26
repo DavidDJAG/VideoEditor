@@ -44,7 +44,7 @@ public sealed class JobQueueServiceTests
             Guid.NewGuid(),
             name,
             "transcode",
-            new OperationParameters("in.mp4", "out.mp4", null, null, [], new Dictionary<string, string>(), null),
+            new OperationParameters("in.mp4", "out.mp4", null, null, null, 1.0, [], new Dictionary<string, string>(), null),
             DateTimeOffset.UtcNow,
             "tester",
             JobState.Draft,
