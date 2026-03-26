@@ -1,6 +1,9 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
+using Microsoft.Win32;
 using VideoEditor.Application.Abstractions;
 using VideoEditor.Domain.Models;
 
@@ -13,6 +16,8 @@ public sealed class PreviewViewModel : INotifyPropertyChanged
 
     private string _inputPath = string.Empty;
     private string _status = "Idle";
+    private string _probeSummary = "Run Probe to inspect the selected media file.";
+    private string _probeJson = "No probe data loaded.";
     private TimeSpan? _inMarker;
     private TimeSpan? _outMarker;
     private TimeSpan? _aStart;
@@ -28,16 +33,19 @@ public sealed class PreviewViewModel : INotifyPropertyChanged
         _ffprobeService = ffprobeService;
         _playbackService = playbackService;
 
-        LoadProbeCommand = new AsyncRelayCommand(LoadProbeAsync, () => !string.IsNullOrWhiteSpace(InputPath));
-        PlaySelectionCommand = new AsyncRelayCommand(PlaySelectionAsync, () => !string.IsNullOrWhiteSpace(InputPath));
-        PlayAbCommand = new AsyncRelayCommand(PlayAbAsync, () => !string.IsNullOrWhiteSpace(InputPath));
-        QuickSeekCommand = new AsyncRelayCommand(QuickSeekAsync, () => !string.IsNullOrWhiteSpace(InputPath) && SelectedSeek.HasValue);
+        BrowseInputCommand = new AsyncRelayCommand(BrowseInputAsync);
+        LoadProbeCommand = new AsyncRelayCommand(LoadProbeAsync, CanLoadInput);
+        PlaySelectionCommand = new AsyncRelayCommand(PlaySelectionAsync, CanLoadInput);
+        PlayAbCommand = new AsyncRelayCommand(PlayAbAsync, CanLoadInput);
+        QuickSeekCommand = new AsyncRelayCommand(QuickSeekAsync, () => CanLoadInput() && SelectedSeek.HasValue);
         StopCommand = new AsyncRelayCommand(StopAsync);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public ObservableCollection<TimeSpan> ProbeSeekPoints { get; } = [];
+
+    public AsyncRelayCommand BrowseInputCommand { get; }
 
     public AsyncRelayCommand LoadProbeCommand { get; }
 
@@ -59,6 +67,18 @@ public sealed class PreviewViewModel : INotifyPropertyChanged
     {
         get => _status;
         private set => Set(ref _status, value);
+    }
+
+    public string ProbeSummary
+    {
+        get => _probeSummary;
+        private set => Set(ref _probeSummary, value);
+    }
+
+    public string ProbeJson
+    {
+        get => _probeJson;
+        private set => Set(ref _probeJson, value);
     }
 
     public TimeSpan? InMarker
@@ -128,6 +148,27 @@ public sealed class PreviewViewModel : INotifyPropertyChanged
             EncodingProfile: null,
             ConcatInputs: null);
 
+    private bool CanLoadInput()
+        => !string.IsNullOrWhiteSpace(InputPath) && File.Exists(InputPath);
+
+    private Task BrowseInputAsync()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "Select media file",
+            CheckFileExists = true,
+            Filter = "Media files|*.mp4;*.mkv;*.mov;*.avi;*.wmv;*.mp3;*.wav;*.m4a;*.flac;*.srt;*.ass;*.vtt|All files|*.*"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            InputPath = dialog.FileName;
+            Status = "Input file selected";
+        }
+
+        return Task.CompletedTask;
+    }
+
     private async Task LoadProbeAsync()
     {
         try
@@ -135,6 +176,7 @@ public sealed class PreviewViewModel : INotifyPropertyChanged
             Status = "Loading probe...";
             var result = await _ffprobeService.ProbeAsync(InputPath);
             PopulateSeekPoints(result);
+            PopulateProbeDetails(result);
             if (!InMarker.HasValue)
             {
                 InMarker = TimeSpan.Zero;
@@ -149,6 +191,8 @@ public sealed class PreviewViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
+            ProbeSummary = "Probe failed.";
+            ProbeJson = ex.Message;
             Status = $"Probe failed: {ex.Message}";
         }
     }
@@ -163,7 +207,7 @@ public sealed class PreviewViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            Status = $"Preview failed: {ex.Message}";
+            Status = $"Preview failed: {_playbackService.LastError ?? ex.Message}";
         }
     }
 
@@ -177,7 +221,7 @@ public sealed class PreviewViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            Status = $"A/B preview failed: {ex.Message}";
+            Status = $"A/B preview failed: {_playbackService.LastError ?? ex.Message}";
         }
     }
 
@@ -196,7 +240,7 @@ public sealed class PreviewViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            Status = $"Seek failed: {ex.Message}";
+            Status = $"Seek failed: {_playbackService.LastError ?? ex.Message}";
         }
     }
 
@@ -233,6 +277,53 @@ public sealed class PreviewViewModel : INotifyPropertyChanged
 
         storage = value;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        RefreshCommands(propertyName);
         return true;
+    }
+
+    private void RefreshCommands(string? propertyName)
+    {
+        if (propertyName is nameof(InputPath) or nameof(SelectedSeek))
+        {
+            LoadProbeCommand.NotifyCanExecuteChanged();
+            PlaySelectionCommand.NotifyCanExecuteChanged();
+            PlayAbCommand.NotifyCanExecuteChanged();
+            QuickSeekCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    private void PopulateProbeDetails(MediaProbeResult result)
+    {
+        var builder = new StringBuilder();
+        builder.AppendLine($"File: {result.FilePath}");
+        builder.AppendLine($"Container: {result.Container}");
+        builder.AppendLine($"Duration: {result.Duration:c}");
+        builder.AppendLine($"Size: {result.SizeBytes:N0} bytes");
+        builder.AppendLine($"Video streams: {result.VideoStreamCount}");
+        builder.AppendLine($"Audio streams: {result.AudioStreamCount}");
+        builder.AppendLine($"Subtitle streams: {result.SubtitleStreamCount}");
+
+        if (result.Width.HasValue && result.Height.HasValue)
+        {
+            builder.AppendLine($"Resolution: {result.Width}x{result.Height}");
+        }
+
+        if (result.FrameRate.HasValue)
+        {
+            builder.AppendLine($"Frame rate: {result.FrameRate.Value:0.###} fps");
+        }
+
+        if (result.AudioSampleRate.HasValue)
+        {
+            builder.AppendLine($"Sample rate: {result.AudioSampleRate.Value} Hz");
+        }
+
+        if (result.AudioChannels.HasValue)
+        {
+            builder.AppendLine($"Audio channels: {result.AudioChannels.Value}");
+        }
+
+        ProbeSummary = builder.ToString().TrimEnd();
+        ProbeJson = result.RawJson;
     }
 }

@@ -41,7 +41,8 @@ public static class FfprobeJsonParser
             ParseInt(primaryVideo, "height"),
             frameRate,
             ParseInt(primaryAudio, "sample_rate"),
-            ParseInt(primaryAudio, "channels"));
+            ParseInt(primaryAudio, "channels"),
+            ffprobeJson);
     }
 
     private static string? ParseString(JsonElement element, string propertyName)

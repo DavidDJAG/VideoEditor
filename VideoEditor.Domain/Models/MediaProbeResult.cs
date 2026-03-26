@@ -12,4 +12,5 @@ public sealed record MediaProbeResult(
     int? Height,
     double? FrameRate,
     int? AudioSampleRate,
-    int? AudioChannels);
+    int? AudioChannels,
+    string RawJson);

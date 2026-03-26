@@ -60,7 +60,20 @@
 
                     <Separator Margin="0,16,0,12" />
                     <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="{StaticResource Text.Preview.Header}" />
-                    <TextBox Margin="0,8,0,0" Text="{Binding PreviewViewModel.InputPath, UpdateSourceTrigger=PropertyChanged}" />
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding PreviewViewModel.InputPath, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Grid.Column="2"
+                                MinWidth="92"
+                                Command="{Binding PreviewViewModel.BrowseInputCommand}"
+                                Content="{StaticResource Text.Preview.Browse}" />
+                    </Grid>
                     <WrapPanel Margin="0,8,0,0">
                         <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.In}" />
                         <TextBox Width="90" Margin="6,0,8,0" Text="{Binding PreviewViewModel.InMarker, UpdateSourceTrigger=PropertyChanged}" />
@@ -87,11 +100,11 @@
                               ItemsSource="{Binding PreviewViewModel.ProbeSeekPoints}"
                               SelectedItem="{Binding PreviewViewModel.SelectedSeek, Mode=TwoWay}" />
                     <WrapPanel Margin="0,8,0,0">
-                        <Button Margin="0,0,6,0" Command="{Binding PreviewViewModel.LoadProbeCommand}" Content="{StaticResource Text.Preview.Probe}" />
-                        <Button Margin="0,0,6,0" Command="{Binding PreviewViewModel.PlaySelectionCommand}" Content="{StaticResource Text.Preview.PlayIO}" />
-                        <Button Margin="0,0,6,0" Command="{Binding PreviewViewModel.PlayAbCommand}" Content="{StaticResource Text.Preview.PlayAB}" />
-                        <Button Margin="0,0,6,0" Command="{Binding PreviewViewModel.QuickSeekCommand}" Content="{StaticResource Text.Preview.QuickSeek}" />
-                        <Button Command="{Binding PreviewViewModel.StopCommand}" Content="{StaticResource Text.Preview.Stop}" />
+                        <Button MinWidth="72" Margin="0,0,6,0" Command="{Binding PreviewViewModel.LoadProbeCommand}" Content="{StaticResource Text.Preview.Probe}" />
+                        <Button MinWidth="90" Margin="0,0,6,0" Command="{Binding PreviewViewModel.PlaySelectionCommand}" Content="{StaticResource Text.Preview.PlayIO}" />
+                        <Button MinWidth="90" Margin="0,0,6,0" Command="{Binding PreviewViewModel.PlayAbCommand}" Content="{StaticResource Text.Preview.PlayAB}" />
+                        <Button MinWidth="100" Margin="0,0,6,0" Command="{Binding PreviewViewModel.QuickSeekCommand}" Content="{StaticResource Text.Preview.QuickSeek}" />
+                        <Button MinWidth="64" Command="{Binding PreviewViewModel.StopCommand}" Content="{StaticResource Text.Preview.Stop}" />
                     </WrapPanel>
                     <TextBlock Margin="0,8,0,0"
                                Style="{StaticResource StatusInfoTextBlockStyle}"

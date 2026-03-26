@@ -2,6 +2,7 @@ using VideoEditor.Application.Abstractions;
 using VideoEditor.Infrastructure.Toolchain;
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 
 namespace VideoEditor.Infrastructure.Services;
 
@@ -11,6 +12,9 @@ public sealed class PlaybackService : IPlaybackService, IDisposable
     private readonly SemaphoreSlim _gate = new(1, 1);
     private Process? _activeProcess;
     private CancellationTokenSource? _monitorCts;
+    private string? _lastError;
+    private Task? _stdoutPump;
+    private Task? _stderrPump;
 
     public PlaybackService(IToolchainResolver toolchainResolver)
     {
@@ -73,6 +77,8 @@ public sealed class PlaybackService : IPlaybackService, IDisposable
         }
     }
 
+    public string? LastError => _lastError;
+
     private async Task RestartProcessAsync(string ffplayPath, string arguments, CancellationToken cancellationToken)
     {
         await _gate.WaitAsync(cancellationToken);
@@ -87,17 +93,34 @@ public sealed class PlaybackService : IPlaybackService, IDisposable
                     FileName = ffplayPath,
                     Arguments = arguments,
                     UseShellExecute = false,
-                    CreateNoWindow = true,
+                    CreateNoWindow = false,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true
                 },
                 EnableRaisingEvents = true
             };
 
+            var stdoutBuffer = new StringBuilder();
+            var stderrBuffer = new StringBuilder();
             process.Start();
+            _lastError = null;
+            _stdoutPump = PumpStreamAsync(process.StandardOutput, stdoutBuffer, cancellationToken);
+            _stderrPump = PumpStreamAsync(process.StandardError, stderrBuffer, cancellationToken);
             _activeProcess = process;
             _monitorCts = new CancellationTokenSource();
             _ = MonitorProcessExitAsync(process, _monitorCts.Token);
+
+            await Task.Delay(300, cancellationToken);
+            if (process.HasExited)
+            {
+                await Task.WhenAll(_stdoutPump, _stderrPump);
+                var error = stderrBuffer.ToString();
+                var output = stdoutBuffer.ToString();
+                _lastError = string.IsNullOrWhiteSpace(error) ? output : error;
+                throw new InvalidOperationException(string.IsNullOrWhiteSpace(_lastError)
+                    ? "ffplay exited before opening a preview window."
+                    : _lastError.Trim());
+            }
         }
         finally
         {
@@ -125,6 +148,8 @@ public sealed class PlaybackService : IPlaybackService, IDisposable
                 _activeProcess = null;
                 _monitorCts?.Dispose();
                 _monitorCts = null;
+                _stdoutPump = null;
+                _stderrPump = null;
             }
         }
         finally
@@ -160,6 +185,8 @@ public sealed class PlaybackService : IPlaybackService, IDisposable
         {
             _activeProcess.Dispose();
             _activeProcess = null;
+            _stdoutPump = null;
+            _stderrPump = null;
         }
     }
 
@@ -179,13 +206,8 @@ public sealed class PlaybackService : IPlaybackService, IDisposable
             args.Add((end.Value - start.Value).ToString("c", CultureInfo.InvariantCulture));
         }
 
-        if (subtitleOffset.HasValue)
-        {
-            args.Add("-sync");
-            args.Add("audio");
-            args.Add("-itsoffset");
-            args.Add(subtitleOffset.Value.TotalSeconds.ToString("0.###", CultureInfo.InvariantCulture));
-        }
+        // ffplay does not accept -itsoffset in this playback flow the same way ffmpeg does.
+        // Keep preview startup reliable and ignore subtitle offset here for now.
 
         if (Math.Abs(speedFactor - 1.0) > 0.0001)
         {
@@ -216,4 +238,23 @@ public sealed class PlaybackService : IPlaybackService, IDisposable
 
     private static string EscapeLavfi(string value)
         => value.Replace("\\", "\\\\").Replace(":", "\\:");
+
+    private static async Task PumpStreamAsync(StreamReader reader, StringBuilder buffer, CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            var line = await reader.ReadLineAsync(cancellationToken);
+            if (line is null)
+            {
+                break;
+            }
+
+            if (buffer.Length > 0)
+            {
+                buffer.AppendLine();
+            }
+
+            buffer.Append(line);
+        }
+    }
 }

@@ -41,7 +41,16 @@
         </Grid>
 
         <Border Grid.Row="2" Style="{StaticResource DialogPanelStyle}">
-            <StackPanel>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="16" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="8" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0">
                 <TextBlock Style="{StaticResource LabelTextBlockStyle}" Text="{StaticResource Text.Dashboard.StartupDiagnostics}" />
                 <TextBlock Margin="0,8,0,0"
                            Style="{StaticResource StatusErrorTextBlockStyle}"
@@ -68,7 +77,36 @@
                     <Run FontWeight="SemiBold" Text="{StaticResource Text.Dashboard.HwAccel}" />
                     <Run Text="{Binding HardwareAccelerationSummary, Mode=OneWay}" />
                 </TextBlock>
-            </StackPanel>
+                </StackPanel>
+
+                <TextBlock Grid.Row="2"
+                           Style="{StaticResource LabelTextBlockStyle}"
+                           Text="{StaticResource Text.Dashboard.ProbeJson}" />
+
+                <Grid Grid.Row="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBox Grid.Row="0"
+                             IsReadOnly="True"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"
+                             MinHeight="120"
+                             Text="{Binding DataContext.PreviewViewModel.ProbeSummary, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneWay}" />
+
+                    <TextBox Grid.Row="2"
+                             IsReadOnly="True"
+                             AcceptsReturn="True"
+                             TextWrapping="NoWrap"
+                             HorizontalScrollBarVisibility="Auto"
+                             VerticalScrollBarVisibility="Auto"
+                             Text="{Binding DataContext.PreviewViewModel.ProbeJson, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneWay}" />
+                </Grid>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>

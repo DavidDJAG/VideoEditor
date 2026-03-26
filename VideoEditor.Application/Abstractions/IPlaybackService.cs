@@ -21,4 +21,6 @@ public interface IPlaybackService
         CancellationToken cancellationToken = default);
 
     Task StopAsync(CancellationToken cancellationToken = default);
+
+    string? LastError { get; }
 }
