@@ -35,13 +35,13 @@ public partial class App : System.Windows.Application
 
         services.AddTransient<MainWindow>();
         services.AddTransient<MainWindowViewModel>();
-        services.AddTransient<DashboardViewModel>();
+        services.AddSingleton<DashboardViewModel>();
 
         services.AddTransient<TrimViewModel>();
         services.AddTransient<TranscodeViewModel>();
         services.AddTransient<ConcatViewModel>();
         services.AddTransient<ProbeViewModel>();
         services.AddTransient<QueueViewModel>();
-        services.AddTransient<SettingsViewModel>();
+        services.AddSingleton<SettingsViewModel>();
     }
 }

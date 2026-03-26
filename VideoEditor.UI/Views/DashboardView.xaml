@@ -7,29 +7,50 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewModels:DashboardDesignViewModel, IsDesignTimeCreatable=True}">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="24" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="20" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-        <StackPanel Grid.Column="0">
-            <TextBlock FontWeight="SemiBold"
-                       Text="Project" />
-            <TextBlock Margin="0,6,0,0"
-                       Text="{Binding CurrentProjectName}" />
-            <TextBlock Margin="0,12,0,0"
-                       FontWeight="SemiBold"
-                       Text="Timeline length" />
-            <TextBlock Margin="0,6,0,0"
-                       Text="{Binding TimelineDurationLabel}" />
-        </StackPanel>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="24" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="2">
-            <TextBlock FontWeight="SemiBold"
-                       Text="Ready tasks" />
-            <ItemsControl Margin="0,6,0,0"
-                          ItemsSource="{Binding ReadyTasks}" />
-        </StackPanel>
+            <StackPanel Grid.Column="0">
+                <TextBlock FontWeight="SemiBold"
+                           Text="Project" />
+                <TextBlock Margin="0,6,0,0"
+                           Text="{Binding CurrentProjectName}" />
+                <TextBlock Margin="0,12,0,0"
+                           FontWeight="SemiBold"
+                           Text="Timeline length" />
+                <TextBlock Margin="0,6,0,0"
+                           Text="{Binding TimelineDurationLabel}" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="2">
+                <TextBlock FontWeight="SemiBold"
+                           Text="Ready tasks" />
+                <ItemsControl Margin="0,6,0,0"
+                              ItemsSource="{Binding ReadyTasks}" />
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="2" BorderBrush="#EEEEEE" BorderThickness="1" CornerRadius="4" Padding="12">
+            <StackPanel>
+                <TextBlock FontWeight="SemiBold" Text="Startup diagnostics" />
+                <TextBlock Margin="0,8,0,0" TextWrapping="Wrap" Text="{Binding BlockingError}" Foreground="Firebrick" />
+
+                <TextBlock Margin="0,8,0,0"><Run FontWeight="SemiBold" Text="ffmpeg path: " /><Run Text="{Binding FfmpegPath}" /></TextBlock>
+                <TextBlock Margin="0,4,0,0"><Run FontWeight="SemiBold" Text="ffprobe path: " /><Run Text="{Binding FfprobePath}" /></TextBlock>
+                <TextBlock Margin="0,4,0,0"><Run FontWeight="SemiBold" Text="Version: " /><Run Text="{Binding FfmpegVersion}" /></TextBlock>
+                <TextBlock Margin="0,4,0,0" TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="Codec support: " /><Run Text="{Binding CodecSupportSummary}" /></TextBlock>
+                <TextBlock Margin="0,4,0,0" TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="Hardware acceleration: " /><Run Text="{Binding HardwareAccelerationSummary}" /></TextBlock>
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>
