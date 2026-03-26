@@ -7,6 +7,13 @@ namespace VideoEditor.Tests;
 
 public sealed class JobQueueServiceTests
 {
+    public static TheoryData<string> NewUiOperations => new()
+    {
+        "extract_audio",
+        "extract_video",
+        "concat"
+    };
+
     [Fact]
     public async Task EnqueueAsync_PersistsAndCompletesJob()
     {
@@ -39,11 +46,28 @@ public sealed class JobQueueServiceTests
         Assert.Single(filtered);
     }
 
-    private static MediaJob CreateJob(string name = "Encode")
+    [Theory]
+    [MemberData(nameof(NewUiOperations))]
+    public async Task EnqueueAsync_Completes_ForEachNewUiOperation(string operation)
+    {
+        var store = new FakeStore();
+        var executor = new FakeExecutor(_ => Task.FromResult(new JobExecutionArtifact(Guid.Empty, "cmd", "", "", 0, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, [])));
+        await using var sut = new InMemoryJobQueueService(store, executor);
+        await sut.InitializeAsync();
+
+        var job = CreateJob(name: $"Job {operation}", operation: operation);
+        await sut.EnqueueAsync(job);
+        await Task.Delay(150);
+
+        var all = await sut.GetAllAsync();
+        Assert.Contains(all, x => x.Id == job.Id && x.State == JobState.Succeeded && x.Operation == operation);
+    }
+
+    private static MediaJob CreateJob(string name = "Encode", string operation = "transcode")
         => new(
             Guid.NewGuid(),
             name,
-            "transcode",
+            operation,
             new OperationParameters("in.mp4", "out.mp4", null, null, null, 1.0, [], new Dictionary<string, string>(), null),
             DateTimeOffset.UtcNow,
             "tester",

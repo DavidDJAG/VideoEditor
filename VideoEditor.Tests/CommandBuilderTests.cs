@@ -6,6 +6,7 @@ namespace VideoEditor.Tests;
 public sealed class CommandBuilderTests
 {
     private readonly CommandBuilder _builder = new();
+    private static readonly EncodingProfile DefaultProfile = new("libx264", "2M", "aac", "128k", "medium", "yuv420p");
 
     [Fact]
     public void BuildTrim_UsesTypedRequestAndExpectedFlags()
@@ -44,6 +45,47 @@ public sealed class CommandBuilderTests
         Assert.Contains("-f hls", command);
         Assert.Contains("-hls_time 4", command);
         Assert.Contains("\"master.m3u8\"", command);
+    }
+
+    [Fact]
+    public void BuildExtractAudio_UsesAudioOnlyFlagsAndDeterministicOrder()
+    {
+        var command = _builder.Build(new ExtractAudioRequest("in.mp4", "out.m4a"));
+
+        Assert.Equal("-y -i \"in.mp4\" -vn -c:a copy \"out.m4a\"", command);
+    }
+
+    [Fact]
+    public void BuildExtractVideo_UsesVideoOnlyFlagsAndDeterministicOrder()
+    {
+        var command = _builder.Build(new ExtractVideoRequest("in.mp4", "out.mp4"));
+
+        Assert.Equal("-y -i \"in.mp4\" -an -c:v copy \"out.mp4\"", command);
+    }
+
+    [Fact]
+    public void BuildConcat_UsesConcatProtocolAndDeterministicOrder()
+    {
+        var command = _builder.Build(new ConcatRequest(["a.mp4", "b.mp4"], "joined.mp4"));
+
+        Assert.Equal("-y -i \"concat:a.mp4|b.mp4\" -c copy \"joined.mp4\"", command);
+    }
+
+    [Fact]
+    public void BuildConcat_FromOperationParameters_UsesOrderedConcatInputs()
+    {
+        var command = _builder.BuildConcat(new OperationParameters(
+            InputPath: "ignored-by-concat",
+            OutputPath: "joined.mp4",
+            Start: null,
+            End: null,
+            EncodingProfile: DefaultProfile,
+            PlaybackSpeed: 1.0,
+            WatermarkOptions: [],
+            AdditionalArgs: new Dictionary<string, string>(),
+            ConcatInputs: ["seg1.mp4", "seg2.mp4", "seg3.mp4"]));
+
+        Assert.Equal("-y -i \"concat:seg1.mp4|seg2.mp4|seg3.mp4\" -c copy \"joined.mp4\"", command);
     }
 
     [Fact]

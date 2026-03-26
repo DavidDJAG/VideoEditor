@@ -7,6 +7,13 @@ namespace VideoEditor.Tests;
 
 public sealed class QueueTransitionTests
 {
+    public static TheoryData<string> NewUiOperations => new()
+    {
+        "extract_audio",
+        "extract_video",
+        "concat"
+    };
+
     [Fact]
     public async Task PauseAndResumeAsync_TransitionsQueuedJob()
     {
@@ -59,6 +66,24 @@ public sealed class QueueTransitionTests
         Assert.True(current.IsCancellationRequested);
     }
 
+    [Theory]
+    [MemberData(nameof(NewUiOperations))]
+    public async Task CancelAsync_MarksCancelled_ForEachNewUiOperation(string operation)
+    {
+        var store = new FakeStore();
+        var executor = new FakeExecutor(_ => Task.FromResult(SuccessArtifact()));
+        await using var sut = new InMemoryJobQueueService(store, executor);
+        await sut.InitializeAsync();
+
+        var job = await sut.CreateDraftAsync(CreateJob(operation: operation));
+        var cancelled = await sut.CancelAsync(job.Id);
+        var current = (await sut.GetAllAsync()).Single(x => x.Id == job.Id);
+
+        Assert.True(cancelled);
+        Assert.Equal(JobState.Cancelled, current.State);
+        Assert.Equal(operation, current.Operation);
+    }
+
     [Fact]
     public async Task RetryAsync_RequeuesFailedJob()
     {
@@ -88,11 +113,38 @@ public sealed class QueueTransitionTests
         Assert.Equal(JobState.Succeeded, succeeded.State);
     }
 
-    private static MediaJob CreateJob()
+    [Theory]
+    [MemberData(nameof(NewUiOperations))]
+    public async Task RetryAsync_RequeuesFailedJob_ForEachNewUiOperation(string operation)
+    {
+        var store = new FakeStore();
+        var attempts = 0;
+        var executor = new FakeExecutor(_ =>
+        {
+            attempts++;
+            var exitCode = attempts == 1 ? 1 : 0;
+            return Task.FromResult(new JobExecutionArtifact(Guid.NewGuid(), "ffmpeg", "", "", exitCode, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, ["out.mp4"]));
+        });
+
+        await using var sut = new InMemoryJobQueueService(store, executor);
+        await sut.InitializeAsync();
+
+        var job = await sut.EnqueueAsync(CreateJob(operation: operation));
+        await Task.Delay(150);
+        var retried = await sut.RetryAsync(job.Id);
+        await Task.Delay(150);
+
+        var succeeded = (await sut.GetAllAsync()).Single(x => x.Id == job.Id);
+        Assert.True(retried);
+        Assert.Equal(JobState.Succeeded, succeeded.State);
+        Assert.Equal(operation, succeeded.Operation);
+    }
+
+    private static MediaJob CreateJob(string operation = "transcode")
         => new(
             Guid.NewGuid(),
             "Queue transition",
-            "transcode",
+            operation,
             new OperationParameters("in.mp4", "out.mp4", null, null, null, 1.0, [], new Dictionary<string, string>(), null),
             DateTimeOffset.UtcNow,
             "tester",

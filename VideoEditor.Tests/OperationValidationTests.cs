@@ -5,6 +5,28 @@ namespace VideoEditor.Tests;
 public sealed class OperationValidationTests
 {
     [Fact]
+    public void ExtractAudioRequest_EmptyPaths_ReturnsValidationErrors()
+    {
+        var request = new ExtractAudioRequest("", "");
+
+        var errors = request.Validate();
+
+        Assert.Contains("InputPath is required.", errors);
+        Assert.Contains("OutputPath is required.", errors);
+    }
+
+    [Fact]
+    public void ExtractVideoRequest_EmptyPaths_ReturnsValidationErrors()
+    {
+        var request = new ExtractVideoRequest(" ", null!);
+
+        var errors = request.Validate();
+
+        Assert.Contains("InputPath is required.", errors);
+        Assert.Contains("OutputPath is required.", errors);
+    }
+
+    [Fact]
     public void TrimRequest_InvalidRange_ReturnsValidationErrors()
     {
         var request = new TrimRequest("in.mp4", "out.mp4", TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(5));
@@ -12,6 +34,36 @@ public sealed class OperationValidationTests
         var errors = request.Validate();
 
         Assert.Contains("End must be greater than Start.", errors);
+    }
+
+    [Fact]
+    public void TrimRequest_NegativeStart_ReturnsValidationErrors()
+    {
+        var request = new TrimRequest("in.mp4", "out.mp4", TimeSpan.FromSeconds(-1), TimeSpan.FromSeconds(4));
+
+        var errors = request.Validate();
+
+        Assert.Contains("Start must be non-negative.", errors);
+    }
+
+    [Fact]
+    public void ConcatRequest_InsufficientInputs_ReturnsValidationErrors()
+    {
+        var request = new ConcatRequest(["single.mp4"], "joined.mp4");
+
+        var errors = request.Validate();
+
+        Assert.Contains("At least two inputs are required.", errors);
+    }
+
+    [Fact]
+    public void ConcatRequest_ContainsEmptyInputPath_ReturnsValidationErrors()
+    {
+        var request = new ConcatRequest(["a.mp4", ""], "joined.mp4");
+
+        var errors = request.Validate();
+
+        Assert.Contains("Concat inputs must be a non-empty ordered list.", errors);
     }
 
     [Fact]
