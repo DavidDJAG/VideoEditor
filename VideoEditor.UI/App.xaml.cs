@@ -18,6 +18,9 @@ public partial class App : System.Windows.Application
         ConfigureServices(services);
         _serviceProvider = services.BuildServiceProvider();
 
+        var queueService = _serviceProvider.GetRequiredService<VideoEditor.Application.Abstractions.IJobQueueService>();
+        queueService.InitializeAsync().GetAwaiter().GetResult();
+
         var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         mainWindow.Show();
     }

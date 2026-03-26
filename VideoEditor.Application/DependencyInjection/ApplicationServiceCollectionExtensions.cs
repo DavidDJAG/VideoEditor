@@ -9,8 +9,6 @@ public static class ApplicationServiceCollectionExtensions
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddSingleton<ICommandBuilder, CommandBuilder>();
-        services.AddSingleton<IJobQueueService, InMemoryJobQueueService>();
-
         return services;
     }
 }

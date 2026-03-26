@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using VideoEditor.Application.Abstractions;
+using VideoEditor.Application.Services;
 using VideoEditor.Infrastructure.Execution;
 using VideoEditor.Infrastructure.FileSystem;
 using VideoEditor.Infrastructure.Services;
@@ -21,6 +22,14 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IFfprobeService, FfprobeService>();
         services.AddSingleton<IPlaybackService, PlaybackService>();
         services.AddSingleton<IToolchainCapabilitiesService, ToolchainCapabilitiesService>();
+
+        services.AddSingleton<IJobStore>(_ =>
+        {
+            var dbPath = Path.Combine(AppContext.BaseDirectory, "data", "jobs.db");
+            return new SqliteJobStore(dbPath);
+        });
+        services.AddSingleton<IJobExecutionService, FfmpegJobExecutionService>();
+        services.AddSingleton<IJobQueueService, InMemoryJobQueueService>();
 
         return services;
     }
