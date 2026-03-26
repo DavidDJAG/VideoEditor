@@ -4,9 +4,9 @@ namespace VideoEditor.UI;
 
 public partial class MainWindow : System.Windows.Window
 {
-    public MainWindow()
+    public MainWindow(MainWindowViewModel viewModel)
     {
         InitializeComponent();
-        DataContext = new MainWindowViewModel();
+        DataContext = viewModel;
     }
 }
