@@ -21,35 +21,53 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
-                <TextBlock FontWeight="SemiBold"
-                           Text="Project" />
+                <TextBlock Style="{StaticResource LabelTextBlockStyle}" Text="{StaticResource Text.Dashboard.Project}" />
                 <TextBlock Margin="0,6,0,0"
+                           Style="{StaticResource SecondaryTextBlockStyle}"
                            Text="{Binding CurrentProjectName}" />
                 <TextBlock Margin="0,12,0,0"
-                           FontWeight="SemiBold"
-                           Text="Timeline length" />
+                           Style="{StaticResource LabelTextBlockStyle}"
+                           Text="{StaticResource Text.Dashboard.TimelineLength}" />
                 <TextBlock Margin="0,6,0,0"
+                           Style="{StaticResource SecondaryTextBlockStyle}"
                            Text="{Binding TimelineDurationLabel}" />
             </StackPanel>
 
             <StackPanel Grid.Column="2">
-                <TextBlock FontWeight="SemiBold"
-                           Text="Ready tasks" />
+                <TextBlock Style="{StaticResource LabelTextBlockStyle}" Text="{StaticResource Text.Dashboard.ReadyTasks}" />
                 <ItemsControl Margin="0,6,0,0"
                               ItemsSource="{Binding ReadyTasks}" />
             </StackPanel>
         </Grid>
 
-        <Border Grid.Row="2" BorderBrush="#EEEEEE" BorderThickness="1" CornerRadius="4" Padding="12">
+        <Border Grid.Row="2" Style="{StaticResource DialogPanelStyle}">
             <StackPanel>
-                <TextBlock FontWeight="SemiBold" Text="Startup diagnostics" />
-                <TextBlock Margin="0,8,0,0" TextWrapping="Wrap" Text="{Binding BlockingError}" Foreground="Firebrick" />
+                <TextBlock Style="{StaticResource LabelTextBlockStyle}" Text="{StaticResource Text.Dashboard.StartupDiagnostics}" />
+                <TextBlock Margin="0,8,0,0"
+                           Style="{StaticResource StatusErrorTextBlockStyle}"
+                           TextWrapping="Wrap"
+                           Text="{Binding BlockingError}" />
 
-                <TextBlock Margin="0,8,0,0"><Run FontWeight="SemiBold" Text="ffmpeg path: " /><Run Text="{Binding FfmpegPath}" /></TextBlock>
-                <TextBlock Margin="0,4,0,0"><Run FontWeight="SemiBold" Text="ffprobe path: " /><Run Text="{Binding FfprobePath}" /></TextBlock>
-                <TextBlock Margin="0,4,0,0"><Run FontWeight="SemiBold" Text="Version: " /><Run Text="{Binding FfmpegVersion}" /></TextBlock>
-                <TextBlock Margin="0,4,0,0" TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="Codec support: " /><Run Text="{Binding CodecSupportSummary}" /></TextBlock>
-                <TextBlock Margin="0,4,0,0" TextWrapping="Wrap"><Run FontWeight="SemiBold" Text="Hardware acceleration: " /><Run Text="{Binding HardwareAccelerationSummary}" /></TextBlock>
+                <TextBlock Margin="0,8,0,0">
+                    <Run FontWeight="SemiBold" Text="{StaticResource Text.Dashboard.FfmpegPath}" />
+                    <Run Text="{Binding FfmpegPath}" />
+                </TextBlock>
+                <TextBlock Margin="0,4,0,0">
+                    <Run FontWeight="SemiBold" Text="{StaticResource Text.Dashboard.FfprobePath}" />
+                    <Run Text="{Binding FfprobePath}" />
+                </TextBlock>
+                <TextBlock Margin="0,4,0,0">
+                    <Run FontWeight="SemiBold" Text="{StaticResource Text.Dashboard.Version}" />
+                    <Run Text="{Binding FfmpegVersion}" />
+                </TextBlock>
+                <TextBlock Margin="0,4,0,0" TextWrapping="Wrap">
+                    <Run FontWeight="SemiBold" Text="{StaticResource Text.Dashboard.CodecSupport}" />
+                    <Run Text="{Binding CodecSupportSummary}" />
+                </TextBlock>
+                <TextBlock Margin="0,4,0,0" TextWrapping="Wrap">
+                    <Run FontWeight="SemiBold" Text="{StaticResource Text.Dashboard.HwAccel}" />
+                    <Run Text="{Binding HardwareAccelerationSummary}" />
+                </TextBlock>
             </StackPanel>
         </Border>
     </Grid>

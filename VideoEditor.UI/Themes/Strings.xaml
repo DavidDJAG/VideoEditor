@@ -1,0 +1,28 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <!-- Localization-ready keys (English v1) -->
+    <sys:String x:Key="Text.MainWindow.Title">Video Editor</sys:String>
+    <sys:String x:Key="Text.Settings.Header">Settings</sys:String>
+    <sys:String x:Key="Text.Settings.ToolsDirectory">Tools directory</sys:String>
+    <sys:String x:Key="Text.Settings.RescanTools">Re-scan tools</sys:String>
+    <sys:String x:Key="Text.Preview.Header">Preview (ffplay)</sys:String>
+    <sys:String x:Key="Text.Preview.In">In</sys:String>
+    <sys:String x:Key="Text.Preview.Out">Out</sys:String>
+    <sys:String x:Key="Text.Preview.SubOffset">Sub offset</sys:String>
+    <sys:String x:Key="Text.Preview.Speed">Speed</sys:String>
+    <sys:String x:Key="Text.Preview.Probe">Probe</sys:String>
+    <sys:String x:Key="Text.Preview.PlayIO">Play I/O</sys:String>
+    <sys:String x:Key="Text.Preview.PlayAB">Play A/B</sys:String>
+    <sys:String x:Key="Text.Preview.QuickSeek">Quick seek</sys:String>
+    <sys:String x:Key="Text.Preview.Stop">Stop</sys:String>
+    <sys:String x:Key="Text.Dashboard.Project">Project</sys:String>
+    <sys:String x:Key="Text.Dashboard.TimelineLength">Timeline length</sys:String>
+    <sys:String x:Key="Text.Dashboard.ReadyTasks">Ready tasks</sys:String>
+    <sys:String x:Key="Text.Dashboard.StartupDiagnostics">Startup diagnostics</sys:String>
+    <sys:String x:Key="Text.Dashboard.FfmpegPath">ffmpeg path: </sys:String>
+    <sys:String x:Key="Text.Dashboard.FfprobePath">ffprobe path: </sys:String>
+    <sys:String x:Key="Text.Dashboard.Version">Version: </sys:String>
+    <sys:String x:Key="Text.Dashboard.CodecSupport">Codec support: </sys:String>
+    <sys:String x:Key="Text.Dashboard.HwAccel">Hardware acceleration: </sys:String>
+</ResourceDictionary>
