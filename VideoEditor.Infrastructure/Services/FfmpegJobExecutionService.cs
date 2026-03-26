@@ -8,15 +8,18 @@ namespace VideoEditor.Infrastructure.Services;
 public sealed class FfmpegJobExecutionService : IJobExecutionService
 {
     private readonly ICommandBuilder _commandBuilder;
+    private readonly IOperationRequestFactory _operationRequestFactory;
     private readonly IToolchainResolver _toolchainResolver;
     private readonly IProcessExecutor _processExecutor;
 
     public FfmpegJobExecutionService(
         ICommandBuilder commandBuilder,
+        IOperationRequestFactory operationRequestFactory,
         IToolchainResolver toolchainResolver,
         IProcessExecutor processExecutor)
     {
         _commandBuilder = commandBuilder;
+        _operationRequestFactory = operationRequestFactory;
         _toolchainResolver = toolchainResolver;
         _processExecutor = processExecutor;
     }
@@ -24,12 +27,9 @@ public sealed class FfmpegJobExecutionService : IJobExecutionService
     public async Task<JobExecutionArtifact> ExecuteAsync(MediaJob job, CancellationToken cancellationToken = default)
     {
         var startedAt = DateTimeOffset.UtcNow;
-        var command = job.Operation.ToLowerInvariant() switch
-        {
-            "trim" => _commandBuilder.BuildTrim(job.Parameters),
-            "concat" => _commandBuilder.BuildConcat(job.Parameters),
-            _ => _commandBuilder.BuildTranscode(job.Parameters)
-        };
+        OperationCatalog.TryParseLegacyOperation(job.Operation, out var kind);
+        var request = _operationRequestFactory.Create(kind, job.Parameters);
+        var command = _commandBuilder.Build(request);
 
         var toolPaths = _toolchainResolver.ResolvePathsOrThrow();
         var result = await _processExecutor.RunAsync(toolPaths.FfmpegPath, command, cancellationToken);

@@ -9,12 +9,18 @@ public sealed class FfmpegService : IFfmpegService
 {
     private readonly IProcessExecutor _processExecutor;
     private readonly ICommandBuilder _commandBuilder;
+    private readonly IOperationRequestFactory _operationRequestFactory;
     private readonly IToolchainResolver _toolchainResolver;
 
-    public FfmpegService(IProcessExecutor processExecutor, ICommandBuilder commandBuilder, IToolchainResolver toolchainResolver)
+    public FfmpegService(
+        IProcessExecutor processExecutor,
+        ICommandBuilder commandBuilder,
+        IOperationRequestFactory operationRequestFactory,
+        IToolchainResolver toolchainResolver)
     {
         _processExecutor = processExecutor;
         _commandBuilder = commandBuilder;
+        _operationRequestFactory = operationRequestFactory;
         _toolchainResolver = toolchainResolver;
     }
 
@@ -25,9 +31,10 @@ public sealed class FfmpegService : IFfmpegService
         return result.ExitCode;
     }
 
-    public Task<int> ExecuteOperationAsync(OperationParameters operation, CancellationToken cancellationToken = default)
+    public Task<int> ExecuteOperationAsync(OperationKind kind, OperationParameters operation, CancellationToken cancellationToken = default)
     {
-        var args = _commandBuilder.BuildTranscode(operation);
+        var request = _operationRequestFactory.Create(kind, operation);
+        var args = _commandBuilder.Build(request);
         return ExecuteAsync(args, cancellationToken);
     }
 }

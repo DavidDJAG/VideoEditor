@@ -28,6 +28,12 @@ The command pipeline validates operation requests and builds FFmpeg arguments fo
 - Speed/framerate adjustment (`SpeedFramerateRequest`)
 - HLS segmentation (`SegmentHlsRequest`)
 
+### 1.1) Scope baseline by release phase
+
+- **v1 funcional (MVP):** cut/trim, join/concat, split A/V (`Trim`, `Concat`, `ExtractAudio`, `ExtractVideo`).
+- **v1.1+:** normalize loudness, subtitles, watermark, speed/framerate, HLS (plus transcode and advanced builder-backed operations).
+- Operation metadata lives in `OperationCatalog` (`VideoEditor.Domain`) through `OperationKind` + descriptor (visible name, request type, key validations, release phase).
+
 ### 2) Toolchain detection and capabilities snapshot
 
 VideoEditor resolves tools from:

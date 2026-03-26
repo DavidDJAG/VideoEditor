@@ -13,5 +13,5 @@ public sealed class TranscodeViewModel
     }
 
     public Task<int> ExecuteAsync(OperationParameters parameters, CancellationToken cancellationToken = default)
-        => _ffmpegService.ExecuteOperationAsync(parameters, cancellationToken);
+        => _ffmpegService.ExecuteOperationAsync(OperationKind.Convert, parameters, cancellationToken);
 }
