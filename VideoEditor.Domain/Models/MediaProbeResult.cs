@@ -5,6 +5,8 @@ public sealed record MediaProbeResult(
     TimeSpan Duration,
     long SizeBytes,
     string Container,
+    string? VideoCodec,
+    string? AudioCodec,
     int VideoStreamCount,
     int AudioStreamCount,
     int SubtitleStreamCount,
@@ -13,4 +15,6 @@ public sealed record MediaProbeResult(
     double? FrameRate,
     int? AudioSampleRate,
     int? AudioChannels,
+    string? AudioChannelLayout,
+    string? AudioSampleFormat,
     string RawJson);

@@ -17,6 +17,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IFileSystemService, FileSystemService>();
         services.AddSingleton<ISettingsPersistence, JsonSettingsPersistence>();
         services.AddSingleton<IToolchainResolver, ToolchainResolver>();
+        services.AddSingleton<IConcatCompatibilityService, ConcatCompatibilityService>();
 
         services.AddSingleton<IFfmpegService, FfmpegService>();
         services.AddSingleton<IFfprobeService, FfprobeService>();

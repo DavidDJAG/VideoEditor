@@ -32,6 +32,8 @@ public sealed class IntegrationFixtureTests
         Assert.Equal(TimeSpan.FromSeconds(1), result.Duration);
         Assert.Equal(24576, result.SizeBytes);
         Assert.Equal("mov,mp4,m4a,3gp,3g2,mj2", result.Container);
+        Assert.Equal("h264", result.VideoCodec);
+        Assert.Equal("aac", result.AudioCodec);
         Assert.Equal(1, result.VideoStreamCount);
         Assert.Equal(1, result.AudioStreamCount);
         Assert.Equal(0, result.SubtitleStreamCount);
@@ -40,5 +42,7 @@ public sealed class IntegrationFixtureTests
         Assert.Equal(30000d / 1001d, result.FrameRate);
         Assert.Equal(48000, result.AudioSampleRate);
         Assert.Equal(2, result.AudioChannels);
+        Assert.Equal("stereo", result.AudioChannelLayout);
+        Assert.Equal("fltp", result.AudioSampleFormat);
     }
 }

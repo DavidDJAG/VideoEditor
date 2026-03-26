@@ -11,17 +11,20 @@ public sealed class FfmpegService : IFfmpegService
     private readonly ICommandBuilder _commandBuilder;
     private readonly IOperationRequestFactory _operationRequestFactory;
     private readonly IToolchainResolver _toolchainResolver;
+    private readonly IConcatCompatibilityService _concatCompatibilityService;
 
     public FfmpegService(
         IProcessExecutor processExecutor,
         ICommandBuilder commandBuilder,
         IOperationRequestFactory operationRequestFactory,
-        IToolchainResolver toolchainResolver)
+        IToolchainResolver toolchainResolver,
+        IConcatCompatibilityService concatCompatibilityService)
     {
         _processExecutor = processExecutor;
         _commandBuilder = commandBuilder;
         _operationRequestFactory = operationRequestFactory;
         _toolchainResolver = toolchainResolver;
+        _concatCompatibilityService = concatCompatibilityService;
     }
 
     public async Task<int> ExecuteAsync(string arguments, CancellationToken cancellationToken = default)
@@ -34,7 +37,19 @@ public sealed class FfmpegService : IFfmpegService
     public Task<int> ExecuteOperationAsync(OperationKind kind, OperationParameters operation, CancellationToken cancellationToken = default)
     {
         var request = _operationRequestFactory.Create(kind, operation);
+        if (request is ConcatRequest concat)
+        {
+            return ExecuteConcatWithPrecheckAsync(concat, cancellationToken);
+        }
+
         var args = _commandBuilder.Build(request);
         return ExecuteAsync(args, cancellationToken);
+    }
+
+    private async Task<int> ExecuteConcatWithPrecheckAsync(ConcatRequest concat, CancellationToken cancellationToken)
+    {
+        await _concatCompatibilityService.EnsureStreamCopyCompatibilityAsync(concat.Inputs, cancellationToken);
+        var args = _commandBuilder.Build(concat);
+        return await ExecuteAsync(args, cancellationToken);
     }
 }
