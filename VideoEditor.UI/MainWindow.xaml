@@ -13,6 +13,10 @@
         Width="1238"
         Height="735"
         d:DataContext="{d:DesignInstance Type=viewModels:MainWindowDesignViewModel, IsDesignTimeCreatable=True}">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Window.Resources>
+
     <Grid Margin="{StaticResource Thickness.WindowPadding}"
           Background="{StaticResource Brush.Surface.Background}">
         <Grid.RowDefinitions>
@@ -37,7 +41,8 @@
 
             <Border Grid.Column="0" Style="{StaticResource CardBorderStyle}">
                 <TabControl>
-                    <TabItem Header="Dashboard">
+                    <TabItem Header="Dashboard"
+                             Visibility="{Binding SettingsViewModel.IsDashboardEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <ContentControl Content="{Binding DashboardViewModel}">
                             <ContentControl.ContentTemplate>
                                 <DataTemplate DataType="{x:Type viewModels:DashboardViewModel}">
@@ -47,7 +52,8 @@
                         </ContentControl>
                     </TabItem>
 
-                    <TabItem Header="Cut/Trim">
+                    <TabItem Header="Cut/Trim (beta)"
+                             Visibility="{Binding SettingsViewModel.IsCutTrimEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel>
                             <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="Cut/Trim" />
                             <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input" />
@@ -71,7 +77,8 @@
                         </StackPanel>
                     </TabItem>
 
-                    <TabItem Header="Join/Concat">
+                    <TabItem Header="Join/Concat (beta)"
+                             Visibility="{Binding SettingsViewModel.IsJoinConcatEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel>
                             <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="Join/Concat" />
                             <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input A" />
@@ -91,11 +98,13 @@
                         </StackPanel>
                     </TabItem>
 
-                    <TabItem Header="Split A/V">
+                    <TabItem Header="Split A/V (beta)"
+                             Visibility="{Binding SettingsViewModel.IsSplitAvEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <moduleViews:SplitAvView DataContext="{Binding ModulesWorkbenchViewModel.SplitAvViewModel}" />
                     </TabItem>
 
-                    <TabItem Header="Convert">
+                    <TabItem Header="Convert"
+                             Visibility="{Binding SettingsViewModel.IsConvertEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel>
                             <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="Convert" />
                             <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input" />
@@ -129,6 +138,29 @@
                                TextWrapping="Wrap"
                                Text="{Binding SettingsViewModel.ScanStatus}" />
 
+                    <Separator Margin="0,16,0,12" />
+                    <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="Module rollout" />
+                    <CheckBox Margin="0,8,0,0" Content="Dashboard estable" IsChecked="{Binding SettingsViewModel.IsDashboardEnabled}" />
+                    <CheckBox Margin="0,4,0,0" Content="Preview estable" IsChecked="{Binding SettingsViewModel.IsPreviewEnabled}" />
+                    <CheckBox Margin="0,4,0,0" Content="Cut/Trim habilitado" IsChecked="{Binding SettingsViewModel.IsCutTrimEnabled}" />
+                    <CheckBox Margin="0,2,0,0" Content="Cut/Trim beta interno" IsChecked="{Binding SettingsViewModel.IsCutTrimInternalBeta}" />
+                    <CheckBox Margin="0,4,0,0" Content="Join/Concat habilitado" IsChecked="{Binding SettingsViewModel.IsJoinConcatEnabled}" />
+                    <CheckBox Margin="0,2,0,0" Content="Join/Concat beta interno" IsChecked="{Binding SettingsViewModel.IsJoinConcatInternalBeta}" />
+                    <CheckBox Margin="0,4,0,0" Content="Split A/V habilitado" IsChecked="{Binding SettingsViewModel.IsSplitAvEnabled}" />
+                    <CheckBox Margin="0,2,0,0" Content="Split A/V beta interno" IsChecked="{Binding SettingsViewModel.IsSplitAvInternalBeta}" />
+                    <CheckBox Margin="0,4,0,0" Content="Convert habilitado para público" IsChecked="{Binding SettingsViewModel.IsConvertEnabled}" />
+                    <TextBlock Margin="0,10,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Tasa mínima de éxito beta (0-1)" />
+                    <TextBox Margin="0,4,0,0" Text="{Binding SettingsViewModel.MinimumSuccessRateForBetaExit, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Margin="0,10,0,0"
+                            HorizontalAlignment="Left"
+                            Command="{Binding SettingsViewModel.EvaluateBetaCommand}"
+                            Content="Evaluar salida de beta" />
+                    <TextBlock Margin="0,8,0,0"
+                               Style="{StaticResource SecondaryTextBlockStyle}"
+                               TextWrapping="Wrap"
+                               Text="{Binding SettingsViewModel.BetaStatus}" />
+
+                    <StackPanel Visibility="{Binding SettingsViewModel.IsPreviewEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Separator Margin="0,16,0,12" />
                     <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="{StaticResource Text.Preview.Header}" />
                     <Grid Margin="0,8,0,0">
@@ -181,6 +213,7 @@
                                Style="{StaticResource StatusInfoTextBlockStyle}"
                                TextWrapping="Wrap"
                                Text="{Binding PreviewViewModel.Status}" />
+                    </StackPanel>
                 </StackPanel>
             </Border>
         </Grid>
