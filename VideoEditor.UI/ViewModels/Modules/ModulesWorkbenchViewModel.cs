@@ -9,7 +9,6 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
     private readonly TrimViewModel _trimViewModel;
     private readonly ConcatViewModel _concatViewModel;
     private readonly TranscodeViewModel _transcodeViewModel;
-    private readonly SplitAvViewModel _splitAvViewModel;
 
     private string _trimInputPath = string.Empty;
     private string _trimOutputPath = string.Empty;
@@ -21,11 +20,6 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
     private string _concatInputB = string.Empty;
     private string _concatOutputPath = string.Empty;
     private string _concatStatus = "Idle";
-
-    private string _splitInputPath = string.Empty;
-    private string _audioOutputPath = string.Empty;
-    private string _videoOutputPath = string.Empty;
-    private string _splitStatus = "Idle";
 
     private string _convertInputPath = string.Empty;
     private string _convertOutputPath = string.Empty;
@@ -40,11 +34,10 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
         _trimViewModel = trimViewModel;
         _concatViewModel = concatViewModel;
         _transcodeViewModel = transcodeViewModel;
-        _splitAvViewModel = splitAvViewModel;
+        SplitAvViewModel = splitAvViewModel;
 
         RunTrimCommand = new AsyncRelayCommand(RunTrimAsync);
         RunConcatCommand = new AsyncRelayCommand(RunConcatAsync);
-        RunSplitAvCommand = new AsyncRelayCommand(RunSplitAvAsync);
         RunConvertCommand = new AsyncRelayCommand(RunConvertAsync);
     }
 
@@ -54,9 +47,9 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
 
     public AsyncRelayCommand RunConcatCommand { get; }
 
-    public AsyncRelayCommand RunSplitAvCommand { get; }
-
     public AsyncRelayCommand RunConvertCommand { get; }
+
+    public SplitAvViewModel SplitAvViewModel { get; }
 
     public string TrimInputPath { get => _trimInputPath; set => Set(ref _trimInputPath, value); }
     public string TrimOutputPath { get => _trimOutputPath; set => Set(ref _trimOutputPath, value); }
@@ -68,11 +61,6 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
     public string ConcatInputB { get => _concatInputB; set => Set(ref _concatInputB, value); }
     public string ConcatOutputPath { get => _concatOutputPath; set => Set(ref _concatOutputPath, value); }
     public string ConcatStatus { get => _concatStatus; private set => Set(ref _concatStatus, value); }
-
-    public string SplitInputPath { get => _splitInputPath; set => Set(ref _splitInputPath, value); }
-    public string AudioOutputPath { get => _audioOutputPath; set => Set(ref _audioOutputPath, value); }
-    public string VideoOutputPath { get => _videoOutputPath; set => Set(ref _videoOutputPath, value); }
-    public string SplitStatus { get => _splitStatus; private set => Set(ref _splitStatus, value); }
 
     public string ConvertInputPath { get => _convertInputPath; set => Set(ref _convertInputPath, value); }
     public string ConvertOutputPath { get => _convertOutputPath; set => Set(ref _convertOutputPath, value); }
@@ -134,34 +122,6 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
         catch (Exception ex)
         {
             ConcatStatus = $"Concat error: {ex.Message}";
-        }
-    }
-
-    private async Task RunSplitAvAsync()
-    {
-        if (string.IsNullOrWhiteSpace(SplitInputPath) || string.IsNullOrWhiteSpace(AudioOutputPath) || string.IsNullOrWhiteSpace(VideoOutputPath))
-        {
-            SplitStatus = "Invalid split A/V parameters.";
-            return;
-        }
-
-        try
-        {
-            SplitStatus = "Extracting audio...";
-            var audioExitCode = await _splitAvViewModel.ExtractAudioAsync(SplitInputPath, AudioOutputPath);
-            if (audioExitCode != 0)
-            {
-                SplitStatus = $"Audio extraction failed with exit code {audioExitCode}.";
-                return;
-            }
-
-            SplitStatus = "Extracting video...";
-            var videoExitCode = await _splitAvViewModel.ExtractVideoAsync(SplitInputPath, VideoOutputPath);
-            SplitStatus = videoExitCode == 0 ? "Split A/V completed." : $"Video extraction failed with exit code {videoExitCode}.";
-        }
-        catch (Exception ex)
-        {
-            SplitStatus = $"Split A/V error: {ex.Message}";
         }
     }
 

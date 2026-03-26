@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:VideoEditor.UI.ViewModels"
         xmlns:views="clr-namespace:VideoEditor.UI.Views"
+        xmlns:moduleViews="clr-namespace:VideoEditor.UI.Views.Modules"
         mc:Ignorable="d"
         Title="{StaticResource Text.MainWindow.Title}"
         Background="{StaticResource Brush.Surface.Background}"
@@ -91,23 +92,7 @@
                     </TabItem>
 
                     <TabItem Header="Split A/V">
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="Split A/V" />
-                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input" />
-                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.SplitInputPath, UpdateSourceTrigger=PropertyChanged}" />
-                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Audio Output" />
-                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.AudioOutputPath, UpdateSourceTrigger=PropertyChanged}" />
-                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Video Output" />
-                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.VideoOutputPath, UpdateSourceTrigger=PropertyChanged}" />
-                            <Button Margin="0,12,0,0"
-                                    HorizontalAlignment="Left"
-                                    Command="{Binding ModulesWorkbenchViewModel.RunSplitAvCommand}"
-                                    Content="Run Split A/V" />
-                            <TextBlock Margin="0,8,0,0"
-                                       Style="{StaticResource StatusInfoTextBlockStyle}"
-                                       TextWrapping="Wrap"
-                                       Text="{Binding ModulesWorkbenchViewModel.SplitStatus}" />
-                        </StackPanel>
+                        <moduleViews:SplitAvView DataContext="{Binding ModulesWorkbenchViewModel.SplitAvViewModel}" />
                     </TabItem>
 
                     <TabItem Header="Convert">
