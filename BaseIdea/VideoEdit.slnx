@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="VideoEdit.Application/VideoEdit.Application.csproj" />
+  <Project Path="VideoEdit.Domain/VideoEdit.Domain.csproj" />
+  <Project Path="VideoEdit.Infrastructure/VideoEdit.Infrastructure.csproj" />
+  <Project Path="VideoEdit.Tests/VideoEdit.Tests.csproj" />
+  <Project Path="VideoEdit.UI/VideoEdit.UI.csproj" />
+</Solution>
