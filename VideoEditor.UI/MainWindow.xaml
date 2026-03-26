@@ -6,11 +6,11 @@
         xmlns:viewModels="clr-namespace:VideoEditor.UI.ViewModels"
         xmlns:views="clr-namespace:VideoEditor.UI.Views"
         mc:Ignorable="d"
-        Title="Video Editor"
+        Title="{StaticResource Text.MainWindow.Title}"
         Width="980"
         Height="620"
         d:DataContext="{d:DesignInstance Type=viewModels:MainWindowDesignViewModel, IsDesignTimeCreatable=True}">
-    <Grid Margin="24">
+    <Grid Margin="{StaticResource Thickness.WindowPadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="16" />
@@ -18,11 +18,9 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0">
-            <TextBlock FontSize="28"
-                       FontWeight="SemiBold"
-                       Text="{Binding Title}" />
+            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="{Binding Title}" />
             <TextBlock Margin="0,8,0,0"
-                       Foreground="DimGray"
+                       Style="{StaticResource SecondaryTextBlockStyle}"
                        Text="{Binding Subtitle}" />
         </StackPanel>
 
@@ -33,11 +31,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0"
-                    Padding="16"
-                    BorderBrush="#DDDDDD"
-                    BorderThickness="1"
-                    CornerRadius="6">
+            <Border Grid.Column="0" Style="{StaticResource CardBorderStyle}">
                 <ContentControl Content="{Binding DashboardViewModel}">
                     <ContentControl.ContentTemplate>
                         <DataTemplate DataType="{x:Type viewModels:DashboardViewModel}">
@@ -47,38 +41,33 @@
                 </ContentControl>
             </Border>
 
-            <Border Grid.Column="2"
-                    Padding="16"
-                    BorderBrush="#DDDDDD"
-                    BorderThickness="1"
-                    CornerRadius="6">
+            <Border Grid.Column="2" Style="{StaticResource CardBorderStyle}">
                 <StackPanel>
-                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Settings" />
-                    <TextBlock Margin="0,8,0,0" Text="Tools directory" FontWeight="SemiBold" />
+                    <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="{StaticResource Text.Settings.Header}" />
+                    <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="{StaticResource Text.Settings.ToolsDirectory}" />
                     <TextBox Margin="0,4,0,0" Text="{Binding SettingsViewModel.ToolsDirectory, UpdateSourceTrigger=PropertyChanged}" />
                     <Button Margin="0,12,0,0"
-                            Padding="10,6"
                             HorizontalAlignment="Left"
                             Command="{Binding SettingsViewModel.RescanToolsCommand}"
-                            Content="Re-scan tools" />
+                            Content="{StaticResource Text.Settings.RescanTools}" />
                     <TextBlock Margin="0,8,0,0"
-                               Foreground="DimGray"
+                               Style="{StaticResource SecondaryTextBlockStyle}"
                                TextWrapping="Wrap"
                                Text="{Binding SettingsViewModel.ScanStatus}" />
 
                     <Separator Margin="0,16,0,12" />
-                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Preview (ffplay)" />
+                    <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="{StaticResource Text.Preview.Header}" />
                     <TextBox Margin="0,8,0,0" Text="{Binding PreviewViewModel.InputPath, UpdateSourceTrigger=PropertyChanged}" />
                     <WrapPanel Margin="0,8,0,0">
-                        <TextBlock VerticalAlignment="Center" Text="In" />
+                        <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.In}" />
                         <TextBox Width="90" Margin="6,0,8,0" Text="{Binding PreviewViewModel.InMarker, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock VerticalAlignment="Center" Text="Out" />
+                        <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.Out}" />
                         <TextBox Width="90" Margin="6,0,0,0" Text="{Binding PreviewViewModel.OutMarker, UpdateSourceTrigger=PropertyChanged}" />
                     </WrapPanel>
                     <WrapPanel Margin="0,8,0,0">
-                        <TextBlock VerticalAlignment="Center" Text="Sub offset" />
+                        <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.SubOffset}" />
                         <TextBox Width="90" Margin="6,0,8,0" Text="{Binding PreviewViewModel.SubtitleOffset, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock VerticalAlignment="Center" Text="Speed" />
+                        <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.Speed}" />
                         <TextBox Width="60" Margin="6,0,0,0" Text="{Binding PreviewViewModel.SpeedFactor, UpdateSourceTrigger=PropertyChanged}" />
                     </WrapPanel>
 
@@ -95,14 +84,14 @@
                               ItemsSource="{Binding PreviewViewModel.ProbeSeekPoints}"
                               SelectedItem="{Binding PreviewViewModel.SelectedSeek, Mode=TwoWay}" />
                     <WrapPanel Margin="0,8,0,0">
-                        <Button Padding="8,4" Margin="0,0,6,0" Command="{Binding PreviewViewModel.LoadProbeCommand}" Content="Probe" />
-                        <Button Padding="8,4" Margin="0,0,6,0" Command="{Binding PreviewViewModel.PlaySelectionCommand}" Content="Play I/O" />
-                        <Button Padding="8,4" Margin="0,0,6,0" Command="{Binding PreviewViewModel.PlayAbCommand}" Content="Play A/B" />
-                        <Button Padding="8,4" Margin="0,0,6,0" Command="{Binding PreviewViewModel.QuickSeekCommand}" Content="Quick seek" />
-                        <Button Padding="8,4" Command="{Binding PreviewViewModel.StopCommand}" Content="Stop" />
+                        <Button Margin="0,0,6,0" Command="{Binding PreviewViewModel.LoadProbeCommand}" Content="{StaticResource Text.Preview.Probe}" />
+                        <Button Margin="0,0,6,0" Command="{Binding PreviewViewModel.PlaySelectionCommand}" Content="{StaticResource Text.Preview.PlayIO}" />
+                        <Button Margin="0,0,6,0" Command="{Binding PreviewViewModel.PlayAbCommand}" Content="{StaticResource Text.Preview.PlayAB}" />
+                        <Button Margin="0,0,6,0" Command="{Binding PreviewViewModel.QuickSeekCommand}" Content="{StaticResource Text.Preview.QuickSeek}" />
+                        <Button Command="{Binding PreviewViewModel.StopCommand}" Content="{StaticResource Text.Preview.Stop}" />
                     </WrapPanel>
                     <TextBlock Margin="0,8,0,0"
-                               Foreground="DimGray"
+                               Style="{StaticResource StatusInfoTextBlockStyle}"
                                TextWrapping="Wrap"
                                Text="{Binding PreviewViewModel.Status}" />
                 </StackPanel>
