@@ -7,7 +7,8 @@
     <sys:String x:Key="Text.Settings.ToolsDirectory">Tools directory</sys:String>
     <sys:String x:Key="Text.Settings.RescanTools">Re-scan tools</sys:String>
     <sys:String x:Key="Text.Preview.Header">Preview (ffplay)</sys:String>
-    <sys:String x:Key="Text.Preview.Browse">Browse...</sys:String>
+    <sys:String x:Key="Text.Preview.OpenFile">Open file...</sys:String>
+    <sys:String x:Key="Text.Common.SaveFile">Save file...</sys:String>
     <sys:String x:Key="Text.Preview.In">In</sys:String>
     <sys:String x:Key="Text.Preview.Out">Out</sys:String>
     <sys:String x:Key="Text.Preview.SubOffset">Sub offset</sys:String>

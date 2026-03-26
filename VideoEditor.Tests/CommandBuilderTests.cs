@@ -6,7 +6,7 @@ namespace VideoEditor.Tests;
 public sealed class CommandBuilderTests
 {
     private readonly CommandBuilder _builder = new();
-    private static readonly EncodingProfile DefaultProfile = new("libx264", "2M", "aac", "128k", "medium", "yuv420p");
+    private static readonly EncodingProfile DefaultProfile = new("default", "libx264", "aac", "mp4", "2M", "128k", "yuv420p", "medium");
 
     [Fact]
     public void BuildTrim_UsesTypedRequestAndExpectedFlags()
@@ -79,10 +79,11 @@ public sealed class CommandBuilderTests
             OutputPath: "joined.mp4",
             Start: null,
             End: null,
+            SubtitleOffset: null,
+            SpeedFactor: 1.0,
+            AdditionalInputs: [],
+            Flags: new Dictionary<string, string>(),
             EncodingProfile: DefaultProfile,
-            PlaybackSpeed: 1.0,
-            WatermarkOptions: [],
-            AdditionalArgs: new Dictionary<string, string>(),
             ConcatInputs: ["seg1.mp4", "seg2.mp4", "seg3.mp4"]));
 
         Assert.Equal("-y -i \"concat:seg1.mp4|seg2.mp4|seg3.mp4\" -c copy \"joined.mp4\"", command);

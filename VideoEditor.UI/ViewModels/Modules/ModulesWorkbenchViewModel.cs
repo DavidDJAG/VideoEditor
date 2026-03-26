@@ -1,5 +1,7 @@
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
+using Microsoft.Win32;
 using VideoEditor.Domain.Models;
 
 namespace VideoEditor.UI.ViewModels.Modules;
@@ -39,6 +41,13 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
         RunTrimCommand = new AsyncRelayCommand(RunTrimAsync);
         RunConcatCommand = new AsyncRelayCommand(RunConcatAsync);
         RunConvertCommand = new AsyncRelayCommand(RunConvertAsync);
+        OpenTrimInputCommand = new AsyncRelayCommand(OpenTrimInputAsync);
+        SaveTrimOutputCommand = new AsyncRelayCommand(SaveTrimOutputAsync);
+        OpenConcatInputACommand = new AsyncRelayCommand(OpenConcatInputAAsync);
+        OpenConcatInputBCommand = new AsyncRelayCommand(OpenConcatInputBAsync);
+        SaveConcatOutputCommand = new AsyncRelayCommand(SaveConcatOutputAsync);
+        OpenConvertInputCommand = new AsyncRelayCommand(OpenConvertInputAsync);
+        SaveConvertOutputCommand = new AsyncRelayCommand(SaveConvertOutputAsync);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -48,6 +57,20 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
     public AsyncRelayCommand RunConcatCommand { get; }
 
     public AsyncRelayCommand RunConvertCommand { get; }
+
+    public AsyncRelayCommand OpenTrimInputCommand { get; }
+
+    public AsyncRelayCommand SaveTrimOutputCommand { get; }
+
+    public AsyncRelayCommand OpenConcatInputACommand { get; }
+
+    public AsyncRelayCommand OpenConcatInputBCommand { get; }
+
+    public AsyncRelayCommand SaveConcatOutputCommand { get; }
+
+    public AsyncRelayCommand OpenConvertInputCommand { get; }
+
+    public AsyncRelayCommand SaveConvertOutputCommand { get; }
 
     public SplitAvViewModel SplitAvViewModel { get; }
 
@@ -65,6 +88,76 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
     public string ConvertInputPath { get => _convertInputPath; set => Set(ref _convertInputPath, value); }
     public string ConvertOutputPath { get => _convertOutputPath; set => Set(ref _convertOutputPath, value); }
     public string ConvertStatus { get => _convertStatus; private set => Set(ref _convertStatus, value); }
+
+    private Task OpenTrimInputAsync()
+    {
+        if (TryOpenFile("Select trim input file", out var filePath))
+        {
+            TrimInputPath = filePath;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task SaveTrimOutputAsync()
+    {
+        if (TrySaveFile("Select trim output file", TrimOutputPath, TrimInputPath, out var filePath))
+        {
+            TrimOutputPath = filePath;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OpenConcatInputAAsync()
+    {
+        if (TryOpenFile("Select concat input A", out var filePath))
+        {
+            ConcatInputA = filePath;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OpenConcatInputBAsync()
+    {
+        if (TryOpenFile("Select concat input B", out var filePath))
+        {
+            ConcatInputB = filePath;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task SaveConcatOutputAsync()
+    {
+        if (TrySaveFile("Select concat output file", ConcatOutputPath, ConcatInputA, out var filePath))
+        {
+            ConcatOutputPath = filePath;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OpenConvertInputAsync()
+    {
+        if (TryOpenFile("Select convert input file", out var filePath))
+        {
+            ConvertInputPath = filePath;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task SaveConvertOutputAsync()
+    {
+        if (TrySaveFile("Select converted output file", ConvertOutputPath, ConvertInputPath, out var filePath))
+        {
+            ConvertOutputPath = filePath;
+        }
+
+        return Task.CompletedTask;
+    }
 
     private async Task RunTrimAsync()
     {
@@ -175,4 +268,59 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
         storage = value;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
+
+    private static bool TryOpenFile(string title, out string filePath)
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = title,
+            CheckFileExists = true,
+            Filter = MediaFileFilter
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            filePath = dialog.FileName;
+            return true;
+        }
+
+        filePath = string.Empty;
+        return false;
+    }
+
+    private static bool TrySaveFile(string title, string currentPath, string sourcePath, out string filePath)
+    {
+        var dialog = new SaveFileDialog
+        {
+            Title = title,
+            Filter = MediaFileFilter,
+            FileName = GetSuggestedFileName(currentPath, sourcePath)
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            filePath = dialog.FileName;
+            return true;
+        }
+
+        filePath = string.Empty;
+        return false;
+    }
+
+    private static string GetSuggestedFileName(string currentPath, string sourcePath)
+    {
+        if (!string.IsNullOrWhiteSpace(currentPath))
+        {
+            return Path.GetFileName(currentPath);
+        }
+
+        if (!string.IsNullOrWhiteSpace(sourcePath))
+        {
+            return Path.GetFileName(sourcePath);
+        }
+
+        return string.Empty;
+    }
+
+    private const string MediaFileFilter = "Media files|*.mp4;*.mkv;*.mov;*.avi;*.wmv;*.mp3;*.wav;*.m4a;*.flac;*.aac;*.ts|All files|*.*";
 }

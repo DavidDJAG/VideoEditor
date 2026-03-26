@@ -1,18 +1,18 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!-- Dark palette -->
-    <Color x:Key="Color.Surface.Background">#111827</Color>
-    <Color x:Key="Color.Surface.Panel">#1F2937</Color>
-    <Color x:Key="Color.Surface.PanelAlt">#243041</Color>
-    <Color x:Key="Color.Surface.Border">#334155</Color>
+    <Color x:Key="Color.Surface.Background">#0B1220</Color>
+    <Color x:Key="Color.Surface.Panel">#132238</Color>
+    <Color x:Key="Color.Surface.PanelAlt">#1A2D47</Color>
+    <Color x:Key="Color.Surface.Border">#314866</Color>
 
     <Color x:Key="Color.Text.Primary">#F9FAFB</Color>
     <Color x:Key="Color.Text.Secondary">#CBD5E1</Color>
     <Color x:Key="Color.Text.Disabled">#94A3B8</Color>
 
-    <Color x:Key="Color.Brand.Primary">#3B82F6</Color>
-    <Color x:Key="Color.Brand.PrimaryHover">#60A5FA</Color>
-    <Color x:Key="Color.Brand.PrimaryPressed">#2563EB</Color>
+    <Color x:Key="Color.Brand.Primary">#23466F</Color>
+    <Color x:Key="Color.Brand.PrimaryHover">#2D598C</Color>
+    <Color x:Key="Color.Brand.PrimaryPressed">#1B3859</Color>
 
     <!-- Contrast-safe semantic status colors -->
     <Color x:Key="Color.Status.Success">#22C55E</Color>

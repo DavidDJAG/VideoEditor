@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
+using Microsoft.Win32;
 using VideoEditor.Application.Abstractions;
 using VideoEditor.Domain.Models;
 
@@ -38,6 +40,9 @@ public sealed class SplitAvViewModel : INotifyPropertyChanged
 
         ExtractAudioRequestCommand = new AsyncRelayCommand(ExtractAudioRequestAsync);
         ExtractVideoRequestCommand = new AsyncRelayCommand(ExtractVideoRequestAsync);
+        OpenInputCommand = new AsyncRelayCommand(OpenInputAsync);
+        SaveAudioOutputCommand = new AsyncRelayCommand(SaveAudioOutputAsync);
+        SaveVideoOutputCommand = new AsyncRelayCommand(SaveVideoOutputAsync);
 
         RefreshCommandPreview();
     }
@@ -51,6 +56,12 @@ public sealed class SplitAvViewModel : INotifyPropertyChanged
     public AsyncRelayCommand ExtractAudioRequestCommand { get; }
 
     public AsyncRelayCommand ExtractVideoRequestCommand { get; }
+
+    public AsyncRelayCommand OpenInputCommand { get; }
+
+    public AsyncRelayCommand SaveAudioOutputCommand { get; }
+
+    public AsyncRelayCommand SaveVideoOutputCommand { get; }
 
     public string InputPath
     {
@@ -164,6 +175,43 @@ public sealed class SplitAvViewModel : INotifyPropertyChanged
     {
         get => _status;
         private set => Set(ref _status, value);
+    }
+
+    private Task OpenInputAsync()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "Select source media file",
+            CheckFileExists = true,
+            Filter = MediaFileFilter
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            InputPath = dialog.FileName;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task SaveAudioOutputAsync()
+    {
+        if (TrySaveFile("Select extracted audio file", AudioOutputPath, InputPath, out var filePath))
+        {
+            AudioOutputPath = filePath;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task SaveVideoOutputAsync()
+    {
+        if (TrySaveFile("Select extracted video file", VideoOutputPath, InputPath, out var filePath))
+        {
+            VideoOutputPath = filePath;
+        }
+
+        return Task.CompletedTask;
     }
 
     private async Task ExtractAudioRequestAsync()
@@ -380,4 +428,40 @@ public sealed class SplitAvViewModel : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         return true;
     }
+
+    private static bool TrySaveFile(string title, string currentPath, string sourcePath, out string filePath)
+    {
+        var dialog = new SaveFileDialog
+        {
+            Title = title,
+            Filter = MediaFileFilter,
+            FileName = GetSuggestedFileName(currentPath, sourcePath)
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            filePath = dialog.FileName;
+            return true;
+        }
+
+        filePath = string.Empty;
+        return false;
+    }
+
+    private static string GetSuggestedFileName(string currentPath, string sourcePath)
+    {
+        if (!string.IsNullOrWhiteSpace(currentPath))
+        {
+            return Path.GetFileName(currentPath);
+        }
+
+        if (!string.IsNullOrWhiteSpace(sourcePath))
+        {
+            return Path.GetFileNameWithoutExtension(sourcePath);
+        }
+
+        return string.Empty;
+    }
+
+    private const string MediaFileFilter = "Media files|*.mp4;*.mkv;*.mov;*.avi;*.wmv;*.mp3;*.wav;*.m4a;*.flac;*.aac;*.ts|All files|*.*";
 }

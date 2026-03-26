@@ -10,8 +10,8 @@
         Title="{StaticResource Text.MainWindow.Title}"
         Background="{StaticResource Brush.Surface.Background}"
         Foreground="{StaticResource Brush.Text.Primary}"
-        Width="1238"
-        Height="735"
+        Width="1394"
+        Height="982"
         d:DataContext="{d:DesignInstance Type=viewModels:MainWindowDesignViewModel, IsDesignTimeCreatable=True}">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -19,20 +19,7 @@
 
     <Grid Margin="{StaticResource Thickness.WindowPadding}"
           Background="{StaticResource Brush.Surface.Background}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="16" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <StackPanel Grid.Row="0">
-            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="{Binding Title}" />
-            <TextBlock Margin="0,8,0,0"
-                       Style="{StaticResource SecondaryTextBlockStyle}"
-                       Text="{Binding Subtitle}" />
-        </StackPanel>
-
-        <Grid Grid.Row="2">
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="16" />
@@ -57,9 +44,33 @@
                         <StackPanel>
                             <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="Cut/Trim" />
                             <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input" />
-                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.TrimInputPath, UpdateSourceTrigger=PropertyChanged}" />
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0" Text="{Binding ModulesWorkbenchViewModel.TrimInputPath, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Grid.Column="2"
+                                        MinWidth="92"
+                                        Command="{Binding ModulesWorkbenchViewModel.OpenTrimInputCommand}"
+                                        Content="{StaticResource Text.Preview.OpenFile}" />
+                            </Grid>
                             <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Output" />
-                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.TrimOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0" Text="{Binding ModulesWorkbenchViewModel.TrimOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Grid.Column="2"
+                                        MinWidth="92"
+                                        Command="{Binding ModulesWorkbenchViewModel.SaveTrimOutputCommand}"
+                                        Content="{StaticResource Text.Common.SaveFile}" />
+                            </Grid>
                             <WrapPanel Margin="0,8,0,0">
                                 <TextBlock VerticalAlignment="Center" Text="Start" />
                                 <TextBox Width="100" Margin="6,0,8,0" Text="{Binding ModulesWorkbenchViewModel.TrimStart, UpdateSourceTrigger=PropertyChanged}" />
@@ -82,11 +93,47 @@
                         <StackPanel>
                             <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="Join/Concat" />
                             <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input A" />
-                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.ConcatInputA, UpdateSourceTrigger=PropertyChanged}" />
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0" Text="{Binding ModulesWorkbenchViewModel.ConcatInputA, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Grid.Column="2"
+                                        MinWidth="92"
+                                        Command="{Binding ModulesWorkbenchViewModel.OpenConcatInputACommand}"
+                                        Content="{StaticResource Text.Preview.OpenFile}" />
+                            </Grid>
                             <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input B" />
-                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.ConcatInputB, UpdateSourceTrigger=PropertyChanged}" />
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0" Text="{Binding ModulesWorkbenchViewModel.ConcatInputB, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Grid.Column="2"
+                                        MinWidth="92"
+                                        Command="{Binding ModulesWorkbenchViewModel.OpenConcatInputBCommand}"
+                                        Content="{StaticResource Text.Preview.OpenFile}" />
+                            </Grid>
                             <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Output" />
-                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.ConcatOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0" Text="{Binding ModulesWorkbenchViewModel.ConcatOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Grid.Column="2"
+                                        MinWidth="92"
+                                        Command="{Binding ModulesWorkbenchViewModel.SaveConcatOutputCommand}"
+                                        Content="{StaticResource Text.Common.SaveFile}" />
+                            </Grid>
                             <Button Margin="0,12,0,0"
                                     HorizontalAlignment="Left"
                                     Command="{Binding ModulesWorkbenchViewModel.RunConcatCommand}"
@@ -108,9 +155,33 @@
                         <StackPanel>
                             <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="Convert" />
                             <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input" />
-                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.ConvertInputPath, UpdateSourceTrigger=PropertyChanged}" />
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0" Text="{Binding ModulesWorkbenchViewModel.ConvertInputPath, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Grid.Column="2"
+                                        MinWidth="92"
+                                        Command="{Binding ModulesWorkbenchViewModel.OpenConvertInputCommand}"
+                                        Content="{StaticResource Text.Preview.OpenFile}" />
+                            </Grid>
                             <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Output" />
-                            <TextBox Margin="0,4,0,0" Text="{Binding ModulesWorkbenchViewModel.ConvertOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0" Text="{Binding ModulesWorkbenchViewModel.ConvertOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Grid.Column="2"
+                                        MinWidth="92"
+                                        Command="{Binding ModulesWorkbenchViewModel.SaveConvertOutputCommand}"
+                                        Content="{StaticResource Text.Common.SaveFile}" />
+                            </Grid>
                             <Button Margin="0,12,0,0"
                                     HorizontalAlignment="Left"
                                     Command="{Binding ModulesWorkbenchViewModel.RunConvertCommand}"
@@ -161,55 +232,55 @@
                                Text="{Binding SettingsViewModel.BetaStatus}" />
 
                     <StackPanel Visibility="{Binding SettingsViewModel.IsPreviewEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Separator Margin="0,16,0,12" />
-                    <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="{StaticResource Text.Preview.Header}" />
-                    <Grid Margin="0,8,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="8" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                        <Separator Margin="0,16,0,12" />
+                        <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="{StaticResource Text.Preview.Header}" />
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
-                        <TextBox Grid.Column="0"
+                            <TextBox Grid.Column="0"
                                  Text="{Binding PreviewViewModel.InputPath, UpdateSourceTrigger=PropertyChanged}" />
-                        <Button Grid.Column="2"
+                            <Button Grid.Column="2"
                                 MinWidth="92"
                                 Command="{Binding PreviewViewModel.BrowseInputCommand}"
-                                Content="{StaticResource Text.Preview.Browse}" />
-                    </Grid>
-                    <WrapPanel Margin="0,8,0,0">
-                        <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.In}" />
-                        <TextBox Width="90" Margin="6,0,8,0" Text="{Binding PreviewViewModel.InMarker, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.Out}" />
-                        <TextBox Width="90" Margin="6,0,0,0" Text="{Binding PreviewViewModel.OutMarker, UpdateSourceTrigger=PropertyChanged}" />
-                    </WrapPanel>
-                    <WrapPanel Margin="0,8,0,0">
-                        <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.SubOffset}" />
-                        <TextBox Width="90" Margin="6,0,8,0" Text="{Binding PreviewViewModel.SubtitleOffset, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.Speed}" />
-                        <TextBox Width="60" Margin="6,0,0,0" Text="{Binding PreviewViewModel.SpeedFactor, UpdateSourceTrigger=PropertyChanged}" />
-                    </WrapPanel>
+                                Content="{StaticResource Text.Preview.OpenFile}" />
+                        </Grid>
+                        <WrapPanel Margin="0,8,0,0">
+                            <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.In}" />
+                            <TextBox Width="90" Margin="6,0,8,0" Text="{Binding PreviewViewModel.InMarker, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.Out}" />
+                            <TextBox Width="90" Margin="6,0,0,0" Text="{Binding PreviewViewModel.OutMarker, UpdateSourceTrigger=PropertyChanged}" />
+                        </WrapPanel>
+                        <WrapPanel Margin="0,8,0,0">
+                            <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.SubOffset}" />
+                            <TextBox Width="90" Margin="6,0,8,0" Text="{Binding PreviewViewModel.SubtitleOffset, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.Speed}" />
+                            <TextBox Width="60" Margin="6,0,0,0" Text="{Binding PreviewViewModel.SpeedFactor, UpdateSourceTrigger=PropertyChanged}" />
+                        </WrapPanel>
 
-                    <WrapPanel Margin="0,8,0,0">
-                        <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.MarkerA}" />
-                        <TextBox Width="70" Margin="6,0,4,0" Text="{Binding PreviewViewModel.AStart, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Width="70" Margin="0,0,8,0" Text="{Binding PreviewViewModel.AEnd, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.MarkerB}" />
-                        <TextBox Width="70" Margin="6,0,4,0" Text="{Binding PreviewViewModel.BStart, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBox Width="70" Margin="0,0,0,0" Text="{Binding PreviewViewModel.BEnd, UpdateSourceTrigger=PropertyChanged}" />
-                    </WrapPanel>
+                        <WrapPanel Margin="0,8,0,0">
+                            <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.MarkerA}" />
+                            <TextBox Width="70" Margin="6,0,4,0" Text="{Binding PreviewViewModel.AStart, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBox Width="70" Margin="0,0,8,0" Text="{Binding PreviewViewModel.AEnd, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.MarkerB}" />
+                            <TextBox Width="70" Margin="6,0,4,0" Text="{Binding PreviewViewModel.BStart, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBox Width="70" Margin="0,0,0,0" Text="{Binding PreviewViewModel.BEnd, UpdateSourceTrigger=PropertyChanged}" />
+                        </WrapPanel>
 
-                    <ComboBox Margin="0,8,0,0"
+                        <ComboBox Margin="0,8,0,0"
                               ItemsSource="{Binding PreviewViewModel.ProbeSeekPoints}"
                               SelectedItem="{Binding PreviewViewModel.SelectedSeek, Mode=TwoWay}" />
-                    <WrapPanel Margin="0,8,0,0">
-                        <Button MinWidth="72" Margin="0,0,6,0" Command="{Binding PreviewViewModel.LoadProbeCommand}" Content="{StaticResource Text.Preview.Probe}" />
-                        <Button MinWidth="90" Margin="0,0,6,0" Command="{Binding PreviewViewModel.PlaySelectionCommand}" Content="{StaticResource Text.Preview.PlayIO}" />
-                        <Button MinWidth="90" Margin="0,0,6,0" Command="{Binding PreviewViewModel.PlayAbCommand}" Content="{StaticResource Text.Preview.PlayAB}" />
-                        <Button MinWidth="100" Margin="0,0,6,0" Command="{Binding PreviewViewModel.QuickSeekCommand}" Content="{StaticResource Text.Preview.QuickSeek}" />
-                        <Button MinWidth="64" Command="{Binding PreviewViewModel.StopCommand}" Content="{StaticResource Text.Preview.Stop}" />
-                    </WrapPanel>
-                    <TextBlock Margin="0,8,0,0"
+                        <WrapPanel Margin="0,8,0,0">
+                            <Button MinWidth="72" Margin="0,0,6,0" Command="{Binding PreviewViewModel.LoadProbeCommand}" Content="{StaticResource Text.Preview.Probe}" />
+                            <Button MinWidth="90" Margin="0,0,6,0" Command="{Binding PreviewViewModel.PlaySelectionCommand}" Content="{StaticResource Text.Preview.PlayIO}" />
+                            <Button MinWidth="90" Margin="0,0,6,0" Command="{Binding PreviewViewModel.PlayAbCommand}" Content="{StaticResource Text.Preview.PlayAB}" />
+                            <Button MinWidth="100" Margin="0,0,6,0" Command="{Binding PreviewViewModel.QuickSeekCommand}" Content="{StaticResource Text.Preview.QuickSeek}" />
+                            <Button MinWidth="64" Command="{Binding PreviewViewModel.StopCommand}" Content="{StaticResource Text.Preview.Stop}" />
+                        </WrapPanel>
+                        <TextBlock Margin="0,8,0,0"
                                Style="{StaticResource StatusInfoTextBlockStyle}"
                                TextWrapping="Wrap"
                                Text="{Binding PreviewViewModel.Status}" />

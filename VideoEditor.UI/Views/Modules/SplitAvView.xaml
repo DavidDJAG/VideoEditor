@@ -10,13 +10,49 @@
         <StackPanel>
             <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="Split A/V" />
             <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input" />
-            <TextBox Margin="0,4,0,0" Text="{Binding InputPath, UpdateSourceTrigger=PropertyChanged}" />
+            <Grid Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" Text="{Binding InputPath, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Column="2"
+                        MinWidth="92"
+                        Command="{Binding OpenInputCommand}"
+                        Content="{StaticResource Text.Preview.OpenFile}" />
+            </Grid>
 
             <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Audio Output" />
-            <TextBox Margin="0,4,0,0" Text="{Binding AudioOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+            <Grid Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" Text="{Binding AudioOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Column="2"
+                        MinWidth="92"
+                        Command="{Binding SaveAudioOutputCommand}"
+                        Content="{StaticResource Text.Common.SaveFile}" />
+            </Grid>
 
             <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Video Output" />
-            <TextBox Margin="0,4,0,0" Text="{Binding VideoOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+            <Grid Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" Text="{Binding VideoOutputPath, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Column="2"
+                        MinWidth="92"
+                        Command="{Binding SaveVideoOutputCommand}"
+                        Content="{StaticResource Text.Common.SaveFile}" />
+            </Grid>
 
             <CheckBox Margin="0,12,0,0"
                       IsChecked="{Binding UseAdvancedCodecSelector}"
@@ -66,13 +102,13 @@
             <TextBox Margin="0,4,0,0"
                      IsReadOnly="True"
                      TextWrapping="Wrap"
-                     Text="{Binding GeneratedAudioCommand}" />
+                     Text="{Binding GeneratedAudioCommand, Mode=OneWay}" />
 
             <TextBlock Margin="0,12,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Generated video command (read-only)" />
             <TextBox Margin="0,4,0,0"
                      IsReadOnly="True"
                      TextWrapping="Wrap"
-                     Text="{Binding GeneratedVideoCommand}" />
+                     Text="{Binding GeneratedVideoCommand, Mode=OneWay}" />
 
             <TextBlock Margin="0,12,0,0"
                        Style="{StaticResource StatusInfoTextBlockStyle}"
