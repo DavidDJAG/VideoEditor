@@ -22,9 +22,14 @@ public sealed class FfprobeService : IFfprobeService
     public async Task<MediaProbeResult> ProbeAsync(string inputPath, CancellationToken cancellationToken = default)
     {
         var toolPaths = _toolchainResolver.ResolvePathsOrThrow();
-        await _processExecutor.RunAsync(toolPaths.FfprobePath, $"-v quiet -print_format json -show_format -show_streams \"{inputPath}\"", cancellationToken);
+        var result = await _processExecutor.RunAsync(toolPaths.FfprobePath, $"-v quiet -print_format json -show_format -show_streams \"{inputPath}\"", cancellationToken);
+
+        if (result.ExitCode != 0)
+        {
+            throw new InvalidOperationException($"ffprobe exited with code {result.ExitCode}: {result.StandardError}");
+        }
 
         var fileSize = _fileSystem.Exists(inputPath) ? _fileSystem.GetLength(inputPath) : 0;
-        return new MediaProbeResult(inputPath, TimeSpan.Zero, fileSize, Path.GetExtension(inputPath).TrimStart('.'), 0, 0, 0, null, null, null, null, null);
+        return FfprobeJsonParser.Parse(inputPath, result.StandardOutput, fileSize);
     }
 }
