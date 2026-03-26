@@ -11,17 +11,20 @@ public sealed class FfmpegJobExecutionService : IJobExecutionService
     private readonly IOperationRequestFactory _operationRequestFactory;
     private readonly IToolchainResolver _toolchainResolver;
     private readonly IProcessExecutor _processExecutor;
+    private readonly IConcatCompatibilityService _concatCompatibilityService;
 
     public FfmpegJobExecutionService(
         ICommandBuilder commandBuilder,
         IOperationRequestFactory operationRequestFactory,
         IToolchainResolver toolchainResolver,
-        IProcessExecutor processExecutor)
+        IProcessExecutor processExecutor,
+        IConcatCompatibilityService concatCompatibilityService)
     {
         _commandBuilder = commandBuilder;
         _operationRequestFactory = operationRequestFactory;
         _toolchainResolver = toolchainResolver;
         _processExecutor = processExecutor;
+        _concatCompatibilityService = concatCompatibilityService;
     }
 
     public async Task<JobExecutionArtifact> ExecuteAsync(MediaJob job, CancellationToken cancellationToken = default)
@@ -32,6 +35,27 @@ public sealed class FfmpegJobExecutionService : IJobExecutionService
         var command = _commandBuilder.Build(request);
 
         var toolPaths = _toolchainResolver.ResolvePathsOrThrow();
+        if (request is ConcatRequest concat)
+        {
+            try
+            {
+                await _concatCompatibilityService.EnsureStreamCopyCompatibilityAsync(concat.Inputs, cancellationToken);
+            }
+            catch (ConcatCompatibilityException ex)
+            {
+                var blockedAt = DateTimeOffset.UtcNow;
+                return new JobExecutionArtifact(
+                    job.Id,
+                    $"{toolPaths.FfmpegPath} {command}",
+                    string.Empty,
+                    ex.Message,
+                    -1,
+                    startedAt,
+                    blockedAt,
+                    Array.Empty<string>());
+            }
+        }
+
         var result = await _processExecutor.RunAsync(toolPaths.FfmpegPath, command, cancellationToken);
         var finishedAt = DateTimeOffset.UtcNow;
 

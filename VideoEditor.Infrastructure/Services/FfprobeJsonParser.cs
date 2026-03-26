@@ -34,6 +34,8 @@ public static class FfprobeJsonParser
             TimeSpan.FromSeconds(durationSeconds),
             size,
             container,
+            ParseString(primaryVideo, "codec_name"),
+            ParseString(primaryAudio, "codec_name"),
             videoStreams.Length,
             audioStreams.Length,
             subtitleStreams.Length,
@@ -42,6 +44,8 @@ public static class FfprobeJsonParser
             frameRate,
             ParseInt(primaryAudio, "sample_rate"),
             ParseInt(primaryAudio, "channels"),
+            ParseString(primaryAudio, "channel_layout"),
+            ParseString(primaryAudio, "sample_fmt"),
             ffprobeJson);
     }
 

@@ -73,6 +73,7 @@ public sealed record ConcatRequest(IReadOnlyList<string> Inputs, string OutputPa
     {
         var errors = new List<string>();
         Require(Inputs is { Count: > 1 }, "At least two inputs are required.", errors);
+        Require(Inputs is not null && Inputs.All(input => !string.IsNullOrWhiteSpace(input)), "Concat inputs must be a non-empty ordered list.", errors);
         Require(!string.IsNullOrWhiteSpace(OutputPath), "OutputPath is required.", errors);
         return errors;
     }
