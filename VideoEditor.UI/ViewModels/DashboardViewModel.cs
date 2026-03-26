@@ -18,7 +18,6 @@ public class DashboardViewModel : INotifyPropertyChanged
     public DashboardViewModel(IToolchainCapabilitiesService toolchainCapabilitiesService)
     {
         _toolchainCapabilitiesService = toolchainCapabilitiesService;
-        LoadStartupDiagnostics();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -89,11 +88,11 @@ public class DashboardViewModel : INotifyPropertyChanged
         BlockingError = message;
     }
 
-    private void LoadStartupDiagnostics()
+    public async Task InitializeAsync()
     {
         try
         {
-            var snapshot = _toolchainCapabilitiesService.GetSnapshotAsync().GetAwaiter().GetResult();
+            var snapshot = await _toolchainCapabilitiesService.GetSnapshotAsync();
             ApplySnapshot(snapshot);
         }
         catch (Exception ex)

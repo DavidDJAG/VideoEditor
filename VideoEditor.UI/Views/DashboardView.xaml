@@ -46,27 +46,27 @@
                 <TextBlock Margin="0,8,0,0"
                            Style="{StaticResource StatusErrorTextBlockStyle}"
                            TextWrapping="Wrap"
-                           Text="{Binding BlockingError}" />
+                           Text="{Binding BlockingError, Mode=OneWay}" />
 
                 <TextBlock Margin="0,8,0,0">
                     <Run FontWeight="SemiBold" Text="{StaticResource Text.Dashboard.FfmpegPath}" />
-                    <Run Text="{Binding FfmpegPath}" />
+                    <Run Text="{Binding FfmpegPath, Mode=OneWay}" />
                 </TextBlock>
                 <TextBlock Margin="0,4,0,0">
                     <Run FontWeight="SemiBold" Text="{StaticResource Text.Dashboard.FfprobePath}" />
-                    <Run Text="{Binding FfprobePath}" />
+                    <Run Text="{Binding FfprobePath, Mode=OneWay}" />
                 </TextBlock>
                 <TextBlock Margin="0,4,0,0">
                     <Run FontWeight="SemiBold" Text="{StaticResource Text.Dashboard.Version}" />
-                    <Run Text="{Binding FfmpegVersion}" />
+                    <Run Text="{Binding FfmpegVersion, Mode=OneWay}" />
                 </TextBlock>
                 <TextBlock Margin="0,4,0,0" TextWrapping="Wrap">
                     <Run FontWeight="SemiBold" Text="{StaticResource Text.Dashboard.CodecSupport}" />
-                    <Run Text="{Binding CodecSupportSummary}" />
+                    <Run Text="{Binding CodecSupportSummary, Mode=OneWay}" />
                 </TextBlock>
                 <TextBlock Margin="0,4,0,0" TextWrapping="Wrap">
                     <Run FontWeight="SemiBold" Text="{StaticResource Text.Dashboard.HwAccel}" />
-                    <Run Text="{Binding HardwareAccelerationSummary}" />
+                    <Run Text="{Binding HardwareAccelerationSummary, Mode=OneWay}" />
                 </TextBlock>
             </StackPanel>
         </Border>

@@ -11,23 +11,32 @@ public sealed class QueueTransitionTests
     public async Task PauseAndResumeAsync_TransitionsQueuedJob()
     {
         var store = new FakeStore();
-        var gate = new TaskCompletionSource();
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var executions = 0;
         var executor = new FakeExecutor(async _ =>
         {
-            await gate.Task;
+            var current = Interlocked.Increment(ref executions);
+            if (current == 1)
+            {
+                await gate.Task;
+            }
+
             return SuccessArtifact();
         });
 
         await using var sut = new InMemoryJobQueueService(store, executor, maxConcurrency: 1);
         await sut.InitializeAsync();
 
-        var job = await sut.EnqueueAsync(CreateJob());
-        var paused = await sut.PauseAsync(job.Id);
-        var resumed = await sut.ResumeAsync(job.Id);
+        var runningJob = await sut.EnqueueAsync(CreateJob());
+        await Task.Delay(50);
+
+        var queuedJob = await sut.EnqueueAsync(CreateJob());
+        var paused = await sut.PauseAsync(queuedJob.Id);
+        var resumed = await sut.ResumeAsync(queuedJob.Id);
         gate.SetResult();
         await Task.Delay(150);
 
-        var current = (await sut.GetAllAsync()).Single(x => x.Id == job.Id);
+        var current = (await sut.GetAllAsync()).Single(x => x.Id == queuedJob.Id);
         Assert.True(paused);
         Assert.True(resumed);
         Assert.Equal(JobState.Succeeded, current.State);

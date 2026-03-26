@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
+using System.Windows.Threading;
 using VideoEditor.Application.DependencyInjection;
+using VideoEditor.Application.Abstractions;
 using VideoEditor.Infrastructure.DependencyInjection;
 using VideoEditor.UI.ViewModels;
 using VideoEditor.UI.ViewModels.Modules;
@@ -10,7 +12,7 @@ public partial class App : System.Windows.Application
 {
     private ServiceProvider? _serviceProvider;
 
-    protected override void OnStartup(System.Windows.StartupEventArgs e)
+    protected override async void OnStartup(System.Windows.StartupEventArgs e)
     {
         base.OnStartup(e);
 
@@ -18,16 +20,29 @@ public partial class App : System.Windows.Application
         ConfigureServices(services);
         _serviceProvider = services.BuildServiceProvider();
 
-        var queueService = _serviceProvider.GetRequiredService<VideoEditor.Application.Abstractions.IJobQueueService>();
-        queueService.InitializeAsync().GetAwaiter().GetResult();
-
         var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+        MainWindow = mainWindow;
         mainWindow.Show();
+
+        await Dispatcher.Yield(DispatcherPriority.Background);
+
+        var queueService = _serviceProvider.GetRequiredService<IJobQueueService>();
+        var dashboardViewModel = _serviceProvider.GetRequiredService<DashboardViewModel>();
+
+        try
+        {
+            await queueService.InitializeAsync();
+            await dashboardViewModel.InitializeAsync();
+        }
+        catch (Exception ex)
+        {
+            dashboardViewModel.ApplyError(ex.Message);
+        }
     }
 
     protected override void OnExit(System.Windows.ExitEventArgs e)
     {
-        _serviceProvider?.Dispose();
+        _serviceProvider?.DisposeAsync().AsTask().GetAwaiter().GetResult();
         base.OnExit(e);
     }
 

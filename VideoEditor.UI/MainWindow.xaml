@@ -7,10 +7,13 @@
         xmlns:views="clr-namespace:VideoEditor.UI.Views"
         mc:Ignorable="d"
         Title="{StaticResource Text.MainWindow.Title}"
-        Width="980"
-        Height="620"
+        Background="{StaticResource Brush.Surface.Background}"
+        Foreground="{StaticResource Brush.Text.Primary}"
+        Width="1238"
+        Height="735"
         d:DataContext="{d:DesignInstance Type=viewModels:MainWindowDesignViewModel, IsDesignTimeCreatable=True}">
-    <Grid Margin="{StaticResource Thickness.WindowPadding}">
+    <Grid Margin="{StaticResource Thickness.WindowPadding}"
+          Background="{StaticResource Brush.Surface.Background}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="16" />

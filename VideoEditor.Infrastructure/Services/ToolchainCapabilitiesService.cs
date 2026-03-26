@@ -53,9 +53,9 @@ public sealed class ToolchainCapabilitiesService : IToolchainCapabilitiesService
                 ffmpeg,
                 ffprobe,
                 ffplay,
-                ParseVersion(versionResult.Output),
-                ParseVideoCodecs(codecsResult.Output),
-                ParseHardwareAcceleration(hwAccelResult.Output));
+                ParseVersion(versionResult.StandardOutput),
+                ParseVideoCodecs(codecsResult.StandardOutput),
+                ParseHardwareAcceleration(hwAccelResult.StandardOutput));
 
             _cached = snapshot;
             return snapshot;

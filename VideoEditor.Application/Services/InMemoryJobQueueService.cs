@@ -329,7 +329,7 @@ public sealed class InMemoryJobQueueService : IJobQueueService, IAsyncDisposable
 
         try
         {
-            await _processorTask;
+            await _processorTask.ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
