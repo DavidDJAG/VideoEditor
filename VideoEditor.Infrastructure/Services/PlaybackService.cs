@@ -1,23 +1,23 @@
 using VideoEditor.Application.Abstractions;
 using VideoEditor.Infrastructure.Execution;
-using VideoEditor.Infrastructure.Settings;
+using VideoEditor.Infrastructure.Toolchain;
 
 namespace VideoEditor.Infrastructure.Services;
 
 public sealed class PlaybackService : IPlaybackService
 {
     private readonly IProcessExecutor _processExecutor;
-    private readonly ISettingsPersistence _settingsPersistence;
+    private readonly IToolchainResolver _toolchainResolver;
 
-    public PlaybackService(IProcessExecutor processExecutor, ISettingsPersistence settingsPersistence)
+    public PlaybackService(IProcessExecutor processExecutor, IToolchainResolver toolchainResolver)
     {
         _processExecutor = processExecutor;
-        _settingsPersistence = settingsPersistence;
+        _toolchainResolver = toolchainResolver;
     }
 
     public async Task PlayAsync(string inputPath, CancellationToken cancellationToken = default)
     {
-        var ffplayPath = _settingsPersistence.LoadToolPaths().FfplayPath ?? "ffplay";
+        var ffplayPath = _toolchainResolver.ResolvePathsOrThrow().FfplayPath ?? "ffplay";
         await _processExecutor.RunAsync(ffplayPath, $"-autoexit \"{inputPath}\"", cancellationToken);
     }
 

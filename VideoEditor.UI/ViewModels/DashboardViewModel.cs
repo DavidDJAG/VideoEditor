@@ -1,7 +1,28 @@
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using VideoEditor.Application.Abstractions;
+using VideoEditor.Domain.Models;
+
 namespace VideoEditor.UI.ViewModels;
 
-public class DashboardViewModel
+public class DashboardViewModel : INotifyPropertyChanged
 {
+    private readonly IToolchainCapabilitiesService _toolchainCapabilitiesService;
+    private string _ffmpegPath = "Not scanned";
+    private string _ffprobePath = "Not scanned";
+    private string _ffmpegVersion = "Unknown";
+    private string _codecSupportSummary = "Not scanned";
+    private string _hardwareAccelerationSummary = "Not scanned";
+    private string _blockingError = string.Empty;
+
+    public DashboardViewModel(IToolchainCapabilitiesService toolchainCapabilitiesService)
+    {
+        _toolchainCapabilitiesService = toolchainCapabilitiesService;
+        LoadStartupDiagnostics();
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
     public string CurrentProjectName => "Untitled project";
 
     public string TimelineDurationLabel => "00:00:00";
@@ -12,4 +33,83 @@ public class DashboardViewModel
         "Trim clips",
         "Add transitions"
     ];
+
+    public string FfmpegPath
+    {
+        get => _ffmpegPath;
+        private set => Set(ref _ffmpegPath, value);
+    }
+
+    public string FfprobePath
+    {
+        get => _ffprobePath;
+        private set => Set(ref _ffprobePath, value);
+    }
+
+    public string FfmpegVersion
+    {
+        get => _ffmpegVersion;
+        private set => Set(ref _ffmpegVersion, value);
+    }
+
+    public string CodecSupportSummary
+    {
+        get => _codecSupportSummary;
+        private set => Set(ref _codecSupportSummary, value);
+    }
+
+    public string HardwareAccelerationSummary
+    {
+        get => _hardwareAccelerationSummary;
+        private set => Set(ref _hardwareAccelerationSummary, value);
+    }
+
+    public string BlockingError
+    {
+        get => _blockingError;
+        private set => Set(ref _blockingError, value);
+    }
+
+    public void ApplySnapshot(ToolchainCapabilitiesSnapshot snapshot)
+    {
+        FfmpegPath = snapshot.Ffmpeg.ResolvedPath;
+        FfprobePath = snapshot.Ffprobe.ResolvedPath;
+        FfmpegVersion = snapshot.FfmpegVersion;
+        CodecSupportSummary = snapshot.SupportedVideoCodecs.Count == 0
+            ? "No codecs reported"
+            : $"{snapshot.SupportedVideoCodecs.Count} codecs (e.g. {string.Join(", ", snapshot.SupportedVideoCodecs.Take(6))})";
+        HardwareAccelerationSummary = snapshot.HardwareAccelerationMethods.Count == 0
+            ? "No hardware acceleration detected"
+            : string.Join(", ", snapshot.HardwareAccelerationMethods);
+        BlockingError = string.Empty;
+    }
+
+    public void ApplyError(string message)
+    {
+        BlockingError = message;
+    }
+
+    private void LoadStartupDiagnostics()
+    {
+        try
+        {
+            var snapshot = _toolchainCapabilitiesService.GetSnapshotAsync().GetAwaiter().GetResult();
+            ApplySnapshot(snapshot);
+        }
+        catch (Exception ex)
+        {
+            ApplyError(ex.Message);
+        }
+    }
+
+    protected void Set<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(storage, value))
+        {
+            return;
+        }
+
+        storage = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }

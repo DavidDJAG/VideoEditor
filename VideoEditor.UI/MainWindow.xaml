@@ -7,8 +7,8 @@
         xmlns:views="clr-namespace:VideoEditor.UI.Views"
         mc:Ignorable="d"
         Title="Video Editor"
-        Width="900"
-        Height="520"
+        Width="980"
+        Height="620"
         d:DataContext="{d:DesignInstance Type=viewModels:MainWindowDesignViewModel, IsDesignTimeCreatable=True}">
     <Grid Margin="24">
         <Grid.RowDefinitions>
@@ -26,18 +26,47 @@
                        Text="{Binding Subtitle}" />
         </StackPanel>
 
-        <Border Grid.Row="2"
-                Padding="16"
-                BorderBrush="#DDDDDD"
-                BorderThickness="1"
-                CornerRadius="6">
-            <ContentControl Content="{Binding DashboardViewModel}">
-                <ContentControl.ContentTemplate>
-                    <DataTemplate DataType="{x:Type viewModels:DashboardViewModel}">
-                        <views:DashboardView />
-                    </DataTemplate>
-                </ContentControl.ContentTemplate>
-            </ContentControl>
-        </Border>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Padding="16"
+                    BorderBrush="#DDDDDD"
+                    BorderThickness="1"
+                    CornerRadius="6">
+                <ContentControl Content="{Binding DashboardViewModel}">
+                    <ContentControl.ContentTemplate>
+                        <DataTemplate DataType="{x:Type viewModels:DashboardViewModel}">
+                            <views:DashboardView />
+                        </DataTemplate>
+                    </ContentControl.ContentTemplate>
+                </ContentControl>
+            </Border>
+
+            <Border Grid.Column="2"
+                    Padding="16"
+                    BorderBrush="#DDDDDD"
+                    BorderThickness="1"
+                    CornerRadius="6">
+                <StackPanel>
+                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Settings" />
+                    <TextBlock Margin="0,8,0,0" Text="Tools directory" FontWeight="SemiBold" />
+                    <TextBox Margin="0,4,0,0" Text="{Binding SettingsViewModel.ToolsDirectory, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Margin="0,12,0,0"
+                            Padding="10,6"
+                            HorizontalAlignment="Left"
+                            Command="{Binding SettingsViewModel.RescanToolsCommand}"
+                            Content="Re-scan tools" />
+                    <TextBlock Margin="0,8,0,0"
+                               Foreground="DimGray"
+                               TextWrapping="Wrap"
+                               Text="{Binding SettingsViewModel.ScanStatus}" />
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Window>
