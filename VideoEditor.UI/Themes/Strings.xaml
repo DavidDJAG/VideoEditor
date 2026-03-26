@@ -11,6 +11,8 @@
     <sys:String x:Key="Text.Preview.Out">Out</sys:String>
     <sys:String x:Key="Text.Preview.SubOffset">Sub offset</sys:String>
     <sys:String x:Key="Text.Preview.Speed">Speed</sys:String>
+    <sys:String x:Key="Text.Preview.MarkerA">Marker A</sys:String>
+    <sys:String x:Key="Text.Preview.MarkerB">Marker B</sys:String>
     <sys:String x:Key="Text.Preview.Probe">Probe</sys:String>
     <sys:String x:Key="Text.Preview.PlayIO">Play I/O</sys:String>
     <sys:String x:Key="Text.Preview.PlayAB">Play A/B</sys:String>

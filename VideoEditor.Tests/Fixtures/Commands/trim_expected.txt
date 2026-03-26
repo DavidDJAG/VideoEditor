@@ -1,0 +1,1 @@
+-y -ss 00:00:01 -i "sample_1s.mp4" -t 00:00:03 -c copy "trimmed.mp4"

@@ -1,0 +1,24 @@
+{
+  "format": {
+    "filename": "sample_1s.mp4",
+    "nb_streams": 2,
+    "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+    "duration": "1.000000",
+    "size": "24576"
+  },
+  "streams": [
+    {
+      "index": 0,
+      "codec_type": "video",
+      "width": 320,
+      "height": 180,
+      "avg_frame_rate": "30000/1001"
+    },
+    {
+      "index": 1,
+      "codec_type": "audio",
+      "sample_rate": "48000",
+      "channels": 2
+    }
+  ]
+}

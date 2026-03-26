@@ -72,10 +72,10 @@
                     </WrapPanel>
 
                     <WrapPanel Margin="0,8,0,0">
-                        <TextBlock VerticalAlignment="Center" Text="A" />
+                        <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.MarkerA}" />
                         <TextBox Width="70" Margin="6,0,4,0" Text="{Binding PreviewViewModel.AStart, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBox Width="70" Margin="0,0,8,0" Text="{Binding PreviewViewModel.AEnd, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock VerticalAlignment="Center" Text="B" />
+                        <TextBlock VerticalAlignment="Center" Text="{StaticResource Text.Preview.MarkerB}" />
                         <TextBox Width="70" Margin="6,0,4,0" Text="{Binding PreviewViewModel.BStart, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBox Width="70" Margin="0,0,0,0" Text="{Binding PreviewViewModel.BEnd, UpdateSourceTrigger=PropertyChanged}" />
                     </WrapPanel>
