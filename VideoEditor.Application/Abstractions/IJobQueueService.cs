@@ -4,11 +4,23 @@ namespace VideoEditor.Application.Abstractions;
 
 public interface IJobQueueService
 {
-    IReadOnlyCollection<MediaJob> GetAll();
+    Task InitializeAsync(CancellationToken cancellationToken = default);
 
-    MediaJob Enqueue(MediaJob job);
+    Task<IReadOnlyCollection<MediaJob>> GetAllAsync(CancellationToken cancellationToken = default);
 
-    bool TryUpdate(MediaJob job);
+    Task<IReadOnlyCollection<MediaJob>> GetHistoryAsync(JobHistoryFilter filter, CancellationToken cancellationToken = default);
 
-    bool TryDequeue(Guid jobId, out MediaJob? job);
+    Task<MediaJob> CreateDraftAsync(MediaJob job, CancellationToken cancellationToken = default);
+
+    Task<MediaJob> EnqueueAsync(MediaJob job, CancellationToken cancellationToken = default);
+
+    Task<bool> PauseAsync(Guid jobId, CancellationToken cancellationToken = default);
+
+    Task<bool> ResumeAsync(Guid jobId, CancellationToken cancellationToken = default);
+
+    Task<bool> CancelAsync(Guid jobId, CancellationToken cancellationToken = default);
+
+    Task<bool> RetryAsync(Guid jobId, CancellationToken cancellationToken = default);
+
+    Task<string> ExportDiagnosticsBundleAsync(string targetDirectory, JobHistoryFilter? filter = null, CancellationToken cancellationToken = default);
 }
