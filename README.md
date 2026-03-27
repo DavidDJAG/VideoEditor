@@ -132,6 +132,12 @@ Run the UI project from Visual Studio (Windows) or with:
 dotnet run --project VideoEditor.UI/VideoEditor.UI.csproj
 ```
 
+### Visual Studio workflow
+
+- Use `VideoEditor.UI` as the startup project when you want to launch the application with `F5`.
+- Use `Test > Test Explorer` to run `VideoEditor.Tests`.
+- Do not rely on `F5` over `VideoEditor.Tests` as the way to validate tests; the expected workflow for that project is `Test Explorer` or `dotnet test`.
+
 ## Operational notes
 
 - On startup, queue data is initialized and dashboard diagnostics are loaded.

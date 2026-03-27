@@ -207,6 +207,12 @@ dotnet build VideoEditor.sln
 dotnet test VideoEditor.sln
 ```
 
+### Uso correcto en Visual Studio
+
+1. Use `VideoEditor.UI` como proyecto de inicio para ejecutar la aplicacion con `F5`.
+2. Ejecute `VideoEditor.Tests` desde `Test Explorer`.
+3. Si ve que `dotnet.exe` termina con codigo `0`, interpretelo como cierre normal del proceso, no como evidencia de que la suite se haya validado.
+
 ---
 
 ## 12. Referencias internas
