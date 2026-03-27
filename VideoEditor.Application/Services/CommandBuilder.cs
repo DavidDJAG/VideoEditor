@@ -114,16 +114,15 @@ public sealed class CommandBuilder : ICommandBuilder
         };
 
     private static IReadOnlyList<string> BuildConcat(ConcatRequest request)
-    {
-        var concatInput = $"concat:{string.Join('|', request.Inputs)}";
-        return new List<string>
+        => new List<string>
         {
             "-y",
-            "-i", Quote(concatInput),
+            "-f", "concat",
+            "-safe", "0",
+            "-i", Quote(request.ManifestPath ?? GetConcatManifestPath(request.OutputPath)),
             "-c", "copy",
             Quote(request.OutputPath)
         };
-    }
 
     private static IReadOnlyList<string> BuildNormalize(NormalizeLoudnessRequest request)
     {
@@ -259,6 +258,8 @@ public sealed class CommandBuilder : ICommandBuilder
         };
 
     private static string Quote(string value) => $"\"{value}\"";
+
+    public static string GetConcatManifestPath(string outputPath) => outputPath + ".ffconcat";
 
     private static string EscapeFilterPath(string value)
         => value.Replace("\\", "\\\\").Replace(":", "\\:").Replace("'", "\\'");

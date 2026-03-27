@@ -67,7 +67,7 @@ public sealed record ConvertRequest(string InputPath, string OutputPath, Encodin
     }
 }
 
-public sealed record ConcatRequest(IReadOnlyList<string> Inputs, string OutputPath) : FfmpegOperationRequest
+public sealed record ConcatRequest(IReadOnlyList<string> Inputs, string OutputPath, string? ManifestPath = null) : FfmpegOperationRequest
 {
     public override IReadOnlyList<string> Validate()
     {

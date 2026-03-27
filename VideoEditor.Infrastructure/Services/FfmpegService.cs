@@ -1,4 +1,5 @@
 using VideoEditor.Application.Abstractions;
+using VideoEditor.Application.Services;
 using VideoEditor.Domain.Models;
 using VideoEditor.Infrastructure.Execution;
 using VideoEditor.Infrastructure.Toolchain;
@@ -49,7 +50,32 @@ public sealed class FfmpegService : IFfmpegService
     private async Task<int> ExecuteConcatWithPrecheckAsync(ConcatRequest concat, CancellationToken cancellationToken)
     {
         await _concatCompatibilityService.EnsureStreamCopyCompatibilityAsync(concat.Inputs, cancellationToken);
-        var args = _commandBuilder.Build(concat);
-        return await ExecuteAsync(args, cancellationToken);
+        var manifestPath = concat.ManifestPath ?? CommandBuilder.GetConcatManifestPath(concat.OutputPath);
+        var runtimeRequest = concat with { ManifestPath = manifestPath };
+
+        await WriteConcatManifestAsync(manifestPath, concat.Inputs, cancellationToken);
+
+        try
+        {
+            var args = _commandBuilder.Build(runtimeRequest);
+            return await ExecuteAsync(args, cancellationToken);
+        }
+        finally
+        {
+            if (File.Exists(manifestPath))
+            {
+                File.Delete(manifestPath);
+            }
+        }
     }
+
+    private static Task WriteConcatManifestAsync(string manifestPath, IReadOnlyList<string> inputs, CancellationToken cancellationToken)
+    {
+        var lines = new List<string>(inputs.Count + 1) { "ffconcat version 1.0" };
+        lines.AddRange(inputs.Select(static input => $"file '{EscapeConcatPath(Path.GetFullPath(input))}'"));
+        return File.WriteAllLinesAsync(manifestPath, lines, cancellationToken);
+    }
+
+    private static string EscapeConcatPath(string path)
+        => path.Replace("\\", "/").Replace("'", "'\\''");
 }

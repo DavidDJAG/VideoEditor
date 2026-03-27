@@ -66,9 +66,9 @@ public sealed class CommandBuilderTests
     [Fact]
     public void BuildConcat_UsesConcatProtocolAndDeterministicOrder()
     {
-        var command = _builder.Build(new ConcatRequest(["a.mp4", "b.mp4"], "joined.mp4"));
+        var command = _builder.Build(new ConcatRequest(["a.mp4", "b.mp4"], "joined.mp4", "joined.mp4.ffconcat"));
 
-        Assert.Equal("-y -i \"concat:a.mp4|b.mp4\" -c copy \"joined.mp4\"", command);
+        Assert.Equal("-y -f concat -safe 0 -i \"joined.mp4.ffconcat\" -c copy \"joined.mp4\"", command);
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public sealed class CommandBuilderTests
             EncodingProfile: DefaultProfile,
             ConcatInputs: ["seg1.mp4", "seg2.mp4", "seg3.mp4"]));
 
-        Assert.Equal("-y -i \"concat:seg1.mp4|seg2.mp4|seg3.mp4\" -c copy \"joined.mp4\"", command);
+        Assert.Equal("-y -f concat -safe 0 -i \"joined.mp4.ffconcat\" -c copy \"joined.mp4\"", command);
     }
 
     [Fact]

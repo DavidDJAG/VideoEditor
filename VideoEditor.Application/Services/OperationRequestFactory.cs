@@ -1,5 +1,6 @@
 using VideoEditor.Application.Abstractions;
 using VideoEditor.Domain.Models;
+using System.IO;
 
 namespace VideoEditor.Application.Services;
 
@@ -16,18 +17,19 @@ public sealed class OperationRequestFactory : IOperationRequestFactory
             OperationKind.ExtractAudio => new ExtractAudioRequest(
                 parameters.InputPath,
                 RequireOutput(parameters, kind),
-                parameters.Flags.TryGetValue("audioCodec", out var audioCodec) ? audioCodec : "copy"),
+                ResolveAudioCodec(parameters)),
             OperationKind.ExtractVideo => new ExtractVideoRequest(
                 parameters.InputPath,
                 RequireOutput(parameters, kind),
-                parameters.Flags.TryGetValue("videoCodec", out var videoCodec) ? videoCodec : "copy"),
+                ResolveVideoCodec(parameters)),
             OperationKind.Convert => new ConvertRequest(
                 parameters.InputPath,
                 RequireOutput(parameters, kind),
                 parameters.EncodingProfile ?? throw new InvalidOperationException("Convert requires EncodingProfile.")),
             OperationKind.Concat => new ConcatRequest(
                 parameters.ConcatInputs ?? throw new InvalidOperationException("Concat requires ConcatInputs."),
-                RequireOutput(parameters, kind)),
+                RequireOutput(parameters, kind),
+                CommandBuilder.GetConcatManifestPath(RequireOutput(parameters, kind))),
             OperationKind.NormalizeLoudness => new NormalizeLoudnessRequest(
                 parameters.InputPath,
                 RequireOutput(parameters, kind)),
@@ -67,4 +69,52 @@ public sealed class OperationRequestFactory : IOperationRequestFactory
 
     private static string RequireOutput(OperationParameters parameters, OperationKind kind)
         => parameters.OutputPath ?? throw new InvalidOperationException($"{kind} requires OutputPath.");
+
+    private static string ResolveAudioCodec(OperationParameters parameters)
+    {
+        var requestedCodec = parameters.Flags.TryGetValue("audioCodec", out var audioCodec)
+            ? audioCodec
+            : "copy";
+
+        var normalizedCodec = NormalizeAudioCodecAlias(requestedCodec);
+        if (!normalizedCodec.Equals("copy", StringComparison.OrdinalIgnoreCase))
+        {
+            return normalizedCodec;
+        }
+
+        return Path.GetExtension(RequireOutput(parameters, OperationKind.ExtractAudio)).ToLowerInvariant() switch
+        {
+            ".mp3" => "libmp3lame",
+            ".wav" => "pcm_s16le",
+            ".flac" => "flac",
+            ".aac" => "aac",
+            ".m4a" => "aac",
+            ".opus" => "libopus",
+            _ => normalizedCodec
+        };
+    }
+
+    private static string ResolveVideoCodec(OperationParameters parameters)
+    {
+        var requestedCodec = parameters.Flags.TryGetValue("videoCodec", out var videoCodec)
+            ? videoCodec
+            : "copy";
+
+        return NormalizeVideoCodecAlias(requestedCodec);
+    }
+
+    private static string NormalizeAudioCodecAlias(string codec)
+        => codec.Trim().ToLowerInvariant() switch
+        {
+            "mp3" => "libmp3lame",
+            "wav" => "pcm_s16le",
+            _ => codec.Trim()
+        };
+
+    private static string NormalizeVideoCodecAlias(string codec)
+        => codec.Trim().ToLowerInvariant() switch
+        {
+            "vp9" => "libvpx-vp9",
+            _ => codec.Trim()
+        };
 }
