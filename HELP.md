@@ -4,7 +4,7 @@ Este documento reúne la guía operativa del sistema para uso diario. Está pens
 
 ## 1. ¿Qué es VideoEditor?
 
-VideoEditor es una aplicación de escritorio construida con **WPF + MVVM + .NET 8** que utiliza **FFmpeg, FFprobe y FFplay** para:
+VideoEditor es una aplicación de escritorio construida con **WPF + MVVM + .NET 9** que utiliza **FFmpeg, FFprobe y FFplay** para:
 
 - analizar archivos multimedia,
 - previsualizar segmentos,
@@ -15,7 +15,7 @@ VideoEditor es una aplicación de escritorio construida con **WPF + MVVM + .NET 
 ## 2. Requisitos previos
 
 1. **Sistema**: Windows.
-2. **SDK**: .NET 8.0 o superior.
+2. **SDK**: .NET 9.0 o superior.
 3. **Herramientas**:
    - `ffmpeg`
    - `ffprobe`
@@ -28,7 +28,7 @@ VideoEditor es una aplicación de escritorio construida con **WPF + MVVM + .NET 
 
 Ubicaciones relevantes:
 
-- **Base de jobs**: `data/jobs.db`
+- **Directorio de jobs**: `data/jobs/` (un JSON por job)
 - **Configuración y presets persistentes**: `%AppData%/VideoEditor/`
 - **Ruta de herramientas**: archivo JSON de settings bajo `%AppData%/VideoEditor/`
 - **Bundles de diagnóstico**: carpeta elegida por el operador al exportar

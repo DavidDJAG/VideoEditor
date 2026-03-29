@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VidEditor.Application\VidEditor.Application.csproj" />
+    <ProjectReference Include="..\VidEditor.Infrastructure\VidEditor.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+  </ItemGroup>
+
+
+  <PropertyGroup>
+    <InstallerArtifactDir>$(MSBuildProjectDirectory)\..\artifacts\installer\</InstallerArtifactDir>
+    <InstallerPublishDir>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(TargetFramework)\publish\</InstallerPublishDir>
+    <InstallerArchiveName>VidEditor-$(Configuration)-$(TargetFramework).zip</InstallerArchiveName>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <StartupObject>VidEditor.UI.App</StartupObject>
+    <Title>Video Editor</Title>
+    <Authors>David Jorge Aguirre Grazio</Authors>
+    <Company>Mc &amp; RENOX technologies</Company>
+    <Product>Video Editor</Product>
+    <Description>Video Editor</Description>
+    <Copyright>Copyright © 2026, Mc &amp; RENOX technologies</Copyright>
+  </PropertyGroup>
+
+  <Target Name="PackageInstaller" DependsOnTargets="Publish">
+    <MakeDir Directories="$(InstallerArtifactDir)" />
+    <ItemGroup>
+      <PublishedFiles Include="$(InstallerPublishDir)**\*" />
+    </ItemGroup>
+    <ZipDirectory SourceDirectory="$(InstallerPublishDir)" DestinationFile="$(InstallerArtifactDir)$(InstallerArchiveName)" Overwrite="true" Condition="Exists('$(InstallerPublishDir)')" />
+  </Target>
+
+</Project>

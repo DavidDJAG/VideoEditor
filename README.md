@@ -1,6 +1,6 @@
 # VideoEditor
 
-VideoEditor is a desktop media operations workbench built on **.NET 8 + WPF + MVVM** that orchestrates **FFmpeg, FFprobe, and FFplay** for probing, preview, conversion, queue-driven execution, and diagnostics.
+VideoEditor is a desktop media operations workbench built on **.NET 9 + WPF + MVVM** that orchestrates **FFmpeg, FFprobe, and FFplay** for probing, preview, conversion, queue-driven execution, and diagnostics.
 
 The solution is organized into **UI**, **Application**, **Domain**, **Infrastructure**, and **Tests** layers so that FFmpeg command generation, validation, queue orchestration, persistence, and operator workflows remain maintainable.
 
@@ -201,7 +201,7 @@ The queue layer includes:
 
 Persistence locations:
 
-- jobs database: `data/jobs.db`
+- jobs store directory: `data/jobs/` (one JSON file per job)
 - tool/preset/settings JSON: `%AppData%/VideoEditor/`
 
 ## 7) Solution structure
@@ -209,7 +209,7 @@ Persistence locations:
 - `VideoEditor.UI` — WPF presentation layer, views, view-models, themes
 - `VideoEditor.Application` — command builder, request factory, queue coordination, convert intelligence
 - `VideoEditor.Domain` — models for operations, jobs, probes, settings, toolchain snapshot, convert presets/options
-- `VideoEditor.Infrastructure` — FFmpeg/FFprobe/FFplay services, process execution, SQLite job store, JSON settings persistence, toolchain resolution
+- `VideoEditor.Infrastructure` — FFmpeg/FFprobe/FFplay services, process execution, JSON job store (one file per job), JSON settings persistence, toolchain resolution
 - `VideoEditor.Tests` — unit and integration tests
 
 ## 8) Testing coverage
@@ -229,7 +229,7 @@ The test suite covers, among other areas:
 ## Prerequisites
 
 - Windows
-- .NET SDK 8.0+
+- .NET SDK 9.0+
 - FFmpeg toolchain available (`ffmpeg`, `ffprobe`, optionally `ffplay`)
 - Visual Studio 2026 IDE or `dotnet` CLI
 

@@ -39,3 +39,6 @@ _ReSharper*/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Datos locales de la aplicación
+data/
