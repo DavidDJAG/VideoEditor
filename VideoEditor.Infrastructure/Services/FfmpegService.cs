@@ -43,8 +43,8 @@ public sealed class FfmpegService : IFfmpegService
             return ExecuteConcatWithPrecheckAsync(concat, cancellationToken);
         }
 
-        var args = _commandBuilder.Build(request);
-        return ExecuteAsync(args, cancellationToken);
+        var commands = _commandBuilder.BuildCommandSequence(request);
+        return ExecuteCommandSequenceAsync(commands, request, cancellationToken);
     }
 
     private async Task<int> ExecuteConcatWithPrecheckAsync(ConcatRequest concat, CancellationToken cancellationToken)
@@ -57,14 +57,63 @@ public sealed class FfmpegService : IFfmpegService
 
         try
         {
-            var args = _commandBuilder.Build(runtimeRequest);
-            return await ExecuteAsync(args, cancellationToken);
+            var commands = _commandBuilder.BuildCommandSequence(runtimeRequest);
+            return await ExecuteCommandSequenceAsync(commands, runtimeRequest, cancellationToken);
         }
         finally
         {
             if (File.Exists(manifestPath))
             {
                 File.Delete(manifestPath);
+            }
+        }
+    }
+
+
+    private async Task<int> ExecuteCommandSequenceAsync(IReadOnlyList<string> commands, IFfmpegOperationRequest request, CancellationToken cancellationToken)
+    {
+        if (commands.Count == 0)
+        {
+            return 0;
+        }
+
+        try
+        {
+            foreach (var command in commands)
+            {
+                var exitCode = await ExecuteAsync(command, cancellationToken);
+                if (exitCode != 0)
+                {
+                    return exitCode;
+                }
+            }
+
+            return 0;
+        }
+        finally
+        {
+            CleanupTwoPassArtifacts(request);
+        }
+    }
+
+    private static void CleanupTwoPassArtifacts(IFfmpegOperationRequest request)
+    {
+        if (request is not ConvertRequest { ConvertOptions.Video.PassMode: VideoPassMode.TwoPass } convert)
+        {
+            return;
+        }
+
+        foreach (var path in CommandBuilder.GetTwoPassLogArtifacts(convert.OutputPath))
+        {
+            try
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+            catch
+            {
             }
         }
     }

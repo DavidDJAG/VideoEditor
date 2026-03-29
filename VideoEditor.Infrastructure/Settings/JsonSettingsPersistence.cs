@@ -26,7 +26,7 @@ public sealed class JsonSettingsPersistence : ISettingsPersistence
 
         if (loaded?.ToolPaths is not null && loaded.ModuleFlags is not null && loaded.BetaCriteria is not null)
         {
-            return loaded;
+            return loaded with { ConvertPresets = loaded.ConvertPresets ?? [] };
         }
 
         return LoadLegacyToolPathsFallback(json);
@@ -34,7 +34,8 @@ public sealed class JsonSettingsPersistence : ISettingsPersistence
 
     public void SaveAppSettings(AppSettings settings)
     {
-        var json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
+        var normalized = settings with { ConvertPresets = settings.ConvertPresets ?? [] };
+        var json = JsonSerializer.Serialize(normalized, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(_settingsPath, json);
     }
 
@@ -46,6 +47,17 @@ public sealed class JsonSettingsPersistence : ISettingsPersistence
     public void SaveToolPaths(ToolPaths toolPaths)
     {
         var settings = LoadAppSettings() with { ToolPaths = toolPaths };
+        SaveAppSettings(settings);
+    }
+
+    public ConvertPresetRecord[] LoadConvertPresets()
+    {
+        return LoadAppSettings().ConvertPresets;
+    }
+
+    public void SaveConvertPresets(ConvertPresetRecord[] convertPresets)
+    {
+        var settings = LoadAppSettings() with { ConvertPresets = convertPresets ?? [] };
         SaveAppSettings(settings);
     }
 

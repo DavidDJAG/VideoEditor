@@ -57,7 +57,7 @@ public static class OperationCatalog
                 "Convert/Transcode",
                 typeof(ConvertRequest),
                 OperationPhase.V11Plus,
-                ["InputPath/OutputPath requeridos", "EncodingProfile requerido"]),
+                ["InputPath/OutputPath requeridos", "ConvertOptions requerido"]),
             [OperationKind.Concat] = new(
                 OperationKind.Concat,
                 "Join/Concat",

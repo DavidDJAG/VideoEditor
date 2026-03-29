@@ -2,15 +2,22 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Microsoft.Win32;
+using VideoEditor.Application.Abstractions;
 using VideoEditor.Domain.Models;
+using VideoEditor.Infrastructure.Settings;
 
 namespace VideoEditor.UI.ViewModels.Modules;
 
-public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
+public sealed partial class ModulesWorkbenchViewModel : INotifyPropertyChanged
 {
     private readonly TrimViewModel _trimViewModel;
     private readonly ConcatViewModel _concatViewModel;
     private readonly TranscodeViewModel _transcodeViewModel;
+    private readonly ICommandBuilder _commandBuilder;
+    private readonly IToolchainCapabilitiesService _toolchainCapabilitiesService;
+    private readonly IFfprobeService _ffprobeService;
+    private readonly ISettingsPersistence _settingsPersistence;
+    private readonly IJobQueueService _jobQueueService;
 
     private string _trimInputPath = string.Empty;
     private string _trimOutputPath = string.Empty;
@@ -31,11 +38,21 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
         TrimViewModel trimViewModel,
         ConcatViewModel concatViewModel,
         TranscodeViewModel transcodeViewModel,
-        SplitAvViewModel splitAvViewModel)
+        SplitAvViewModel splitAvViewModel,
+        ICommandBuilder commandBuilder,
+        IToolchainCapabilitiesService toolchainCapabilitiesService,
+        IFfprobeService ffprobeService,
+        ISettingsPersistence settingsPersistence,
+        IJobQueueService jobQueueService)
     {
         _trimViewModel = trimViewModel;
         _concatViewModel = concatViewModel;
         _transcodeViewModel = transcodeViewModel;
+        _commandBuilder = commandBuilder;
+        _toolchainCapabilitiesService = toolchainCapabilitiesService;
+        _ffprobeService = ffprobeService;
+        _settingsPersistence = settingsPersistence;
+        _jobQueueService = jobQueueService;
         SplitAvViewModel = splitAvViewModel;
 
         RunTrimCommand = new AsyncRelayCommand(RunTrimAsync);
@@ -48,6 +65,8 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
         SaveConcatOutputCommand = new AsyncRelayCommand(SaveConcatOutputAsync);
         OpenConvertInputCommand = new AsyncRelayCommand(OpenConvertInputAsync);
         SaveConvertOutputCommand = new AsyncRelayCommand(SaveConvertOutputAsync);
+
+        InitializeConvertEditor();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -151,9 +170,16 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
 
     private Task SaveConvertOutputAsync()
     {
-        if (TrySaveFile("Select converted output file", ConvertOutputPath, ConvertInputPath, out var filePath))
+        var dialog = new SaveFileDialog
         {
-            ConvertOutputPath = filePath;
+            Title = "Select converted output file",
+            Filter = BuildConvertOutputFilter(),
+            FileName = Path.GetFileName(BuildSuggestedConvertOutputPath())
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            ConvertOutputPath = dialog.FileName;
         }
 
         return Task.CompletedTask;
@@ -218,46 +244,6 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
         }
     }
 
-    private async Task RunConvertAsync()
-    {
-        if (string.IsNullOrWhiteSpace(ConvertInputPath) || string.IsNullOrWhiteSpace(ConvertOutputPath))
-        {
-            ConvertStatus = "Invalid convert parameters.";
-            return;
-        }
-
-        try
-        {
-            ConvertStatus = "Running convert...";
-            var profile = new EncodingProfile(
-                Name: "Balanced H264/AAC",
-                VideoCodec: "libx264",
-                AudioCodec: "aac",
-                Container: "mp4",
-                VideoBitrate: "2500k",
-                AudioBitrate: "160k",
-                PixelFormat: "yuv420p",
-                Preset: "medium");
-
-            var exitCode = await _transcodeViewModel.ExecuteAsync(new OperationParameters(
-                ConvertInputPath,
-                ConvertOutputPath,
-                Start: null,
-                End: null,
-                SubtitleOffset: TimeSpan.Zero,
-                SpeedFactor: 1.0,
-                AdditionalInputs: [],
-                Flags: new Dictionary<string, string>(),
-                EncodingProfile: profile));
-
-            ConvertStatus = exitCode == 0 ? "Convert completed." : $"Convert failed with exit code {exitCode}.";
-        }
-        catch (Exception ex)
-        {
-            ConvertStatus = $"Convert error: {ex.Message}";
-        }
-    }
-
     private void Set<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)
     {
         if (EqualityComparer<T>.Default.Equals(storage, value))
@@ -266,8 +252,12 @@ public sealed class ModulesWorkbenchViewModel : INotifyPropertyChanged
         }
 
         storage = value;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        RaisePropertyChanged(propertyName);
+        OnStatePropertyChanged(propertyName);
     }
+
+    private void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
     private static bool TryOpenFile(string title, out string filePath)
     {

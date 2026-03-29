@@ -11,4 +11,8 @@ public interface ISettingsPersistence
     ToolPaths LoadToolPaths();
 
     void SaveToolPaths(ToolPaths toolPaths);
+
+    ConvertPresetRecord[] LoadConvertPresets();
+
+    void SaveConvertPresets(ConvertPresetRecord[] convertPresets);
 }

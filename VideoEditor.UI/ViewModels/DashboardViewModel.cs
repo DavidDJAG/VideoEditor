@@ -74,12 +74,19 @@ public class DashboardViewModel : INotifyPropertyChanged
         FfmpegPath = snapshot.Ffmpeg.ResolvedPath;
         FfprobePath = snapshot.Ffprobe.ResolvedPath;
         FfmpegVersion = snapshot.FfmpegVersion;
-        CodecSupportSummary = snapshot.SupportedVideoCodecs.Count == 0
+
+        var reportedVideoCapabilities = snapshot.VideoEncoders.Count == 0
+            ? snapshot.SupportedVideoCodecs
+            : snapshot.VideoEncoders;
+
+        CodecSupportSummary = reportedVideoCapabilities.Count == 0
             ? "No codecs reported"
-            : $"{snapshot.SupportedVideoCodecs.Count} codecs (e.g. {string.Join(", ", snapshot.SupportedVideoCodecs.Take(6))})";
+            : $"{reportedVideoCapabilities.Count} video capabilities (e.g. {string.Join(", ", reportedVideoCapabilities.Take(6))})";
+
         HardwareAccelerationSummary = snapshot.HardwareAccelerationMethods.Count == 0
             ? "No hardware acceleration detected"
             : string.Join(", ", snapshot.HardwareAccelerationMethods);
+
         BlockingError = string.Empty;
     }
 

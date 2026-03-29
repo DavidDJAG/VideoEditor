@@ -7,4 +7,9 @@ public sealed record ToolchainCapabilitiesSnapshot(
     ToolchainBinaryDiagnostic? Ffplay,
     string FfmpegVersion,
     IReadOnlyList<string> SupportedVideoCodecs,
-    IReadOnlyList<string> HardwareAccelerationMethods);
+    IReadOnlyList<string> HardwareAccelerationMethods,
+    IReadOnlyList<string> VideoEncoders,
+    IReadOnlyList<string> AudioEncoders,
+    IReadOnlyList<string> Muxers,
+    IReadOnlyList<string> PixelFormats,
+    IReadOnlyList<string>? SubtitleEncoders = null);

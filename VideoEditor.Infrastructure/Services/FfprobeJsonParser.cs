@@ -14,7 +14,7 @@ public static class FfprobeJsonParser
         var format = root.TryGetProperty("format", out var formatNode) ? formatNode : default;
         var streams = root.TryGetProperty("streams", out var streamNode) && streamNode.ValueKind == JsonValueKind.Array
             ? streamNode.EnumerateArray().ToArray()
-            : [];
+            : Array.Empty<JsonElement>();
 
         var durationSeconds = ParseDouble(format, "duration") ?? 0;
         var size = ParseLong(format, "size") ?? fallbackSizeBytes;
@@ -28,6 +28,8 @@ public static class FfprobeJsonParser
         var primaryAudio = audioStreams.FirstOrDefault();
 
         var frameRate = ParseRatio(primaryVideo, "avg_frame_rate") ?? ParseRatio(primaryVideo, "r_frame_rate");
+        var streamInfos = BuildStreamInfos(streams);
+        var formatTags = ParseTags(format);
 
         return new MediaProbeResult(
             inputPath,
@@ -46,7 +48,67 @@ public static class FfprobeJsonParser
             ParseInt(primaryAudio, "channels"),
             ParseString(primaryAudio, "channel_layout"),
             ParseString(primaryAudio, "sample_fmt"),
-            ffprobeJson);
+            ffprobeJson,
+            streamInfos,
+            formatTags);
+    }
+
+    private static IReadOnlyList<MediaStreamInfo> BuildStreamInfos(IEnumerable<JsonElement> streams)
+    {
+        var counters = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var infos = new List<MediaStreamInfo>();
+
+        foreach (var stream in streams)
+        {
+            var streamType = ParseString(stream, "codec_type") ?? "unknown";
+            if (!counters.TryGetValue(streamType, out var typeIndex))
+            {
+                typeIndex = 0;
+            }
+
+            counters[streamType] = typeIndex + 1;
+            var tags = ParseTags(stream);
+            var disposition = stream.TryGetProperty("disposition", out var dispositionNode) ? dispositionNode : default;
+            var frameRate = ParseRatio(stream, "avg_frame_rate") ?? ParseRatio(stream, "r_frame_rate");
+
+            infos.Add(new MediaStreamInfo(
+                SourceIndex: ParseInt(stream, "index") ?? infos.Count,
+                StreamType: streamType,
+                TypeIndex: typeIndex,
+                CodecName: ParseString(stream, "codec_name"),
+                CodecLongName: ParseString(stream, "codec_long_name"),
+                Language: tags.TryGetValue("language", out var language) ? language : null,
+                Title: tags.TryGetValue("title", out var title) ? title : null,
+                Width: ParseInt(stream, "width"),
+                Height: ParseInt(stream, "height"),
+                FrameRate: frameRate,
+                SampleRate: ParseInt(stream, "sample_rate"),
+                Channels: ParseInt(stream, "channels"),
+                ChannelLayout: ParseString(stream, "channel_layout"),
+                IsDefault: ParseInt(disposition, "default") == 1,
+                IsForced: ParseInt(disposition, "forced") == 1));
+        }
+
+        return infos;
+    }
+
+    private static Dictionary<string, string> ParseTags(JsonElement element)
+    {
+        var tags = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (element.ValueKind == JsonValueKind.Undefined || !element.TryGetProperty("tags", out var tagsNode) || tagsNode.ValueKind != JsonValueKind.Object)
+        {
+            return tags;
+        }
+
+        foreach (var property in tagsNode.EnumerateObject())
+        {
+            if (property.Value.ValueKind == JsonValueKind.String)
+            {
+                tags[property.Name] = property.Value.GetString() ?? string.Empty;
+            }
+        }
+
+        return tags;
     }
 
     private static string? ParseString(JsonElement element, string propertyName)

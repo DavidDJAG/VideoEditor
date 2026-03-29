@@ -1,139 +1,355 @@
-# HELP - Manual de operación de VideoEditor
+# HELP - Guía de operación de VideoEditor
 
-Este documento describe cómo operar VideoEditor en un entorno de trabajo diario.
+Este documento reúne la guía operativa del sistema para uso diario. Está pensado para sustituir la información dispersa de entregas intermedias y dejar una referencia estable del comportamiento actual de la aplicación.
 
 ## 1. ¿Qué es VideoEditor?
 
-VideoEditor es una aplicación de escritorio (WPF/MVVM) que utiliza FFmpeg, FFprobe y FFplay para:
+VideoEditor es una aplicación de escritorio construida con **WPF + MVVM + .NET 8** que utiliza **FFmpeg, FFprobe y FFplay** para:
 
-- ejecutar operaciones de edición/transcodificación,
-- inspeccionar metadatos multimedia,
-- previsualizar segmentos con marcadores,
+- analizar archivos multimedia,
+- previsualizar segmentos,
+- ejecutar conversiones y otras operaciones de edición,
 - administrar una cola persistente de trabajos,
-- exportar diagnósticos para soporte y liberación.
-
----
+- exportar diagnósticos de ejecución.
 
 ## 2. Requisitos previos
 
-1. **Sistema**: Windows con .NET SDK 8.0+.
-2. **Herramientas multimedia**:
+1. **Sistema**: Windows.
+2. **SDK**: .NET 8.0 o superior.
+3. **Herramientas**:
    - `ffmpeg`
    - `ffprobe`
-   - `ffplay` (recomendado para previsualización)
-3. **Acceso de escritura** en:
-   - `%AppData%/VideoEditor/` (archivo `tools.json`)
-   - carpeta `data/` junto al ejecutable (base `jobs.db`)
+   - `ffplay` (recomendado para Preview)
+4. **Acceso de escritura** en:
+   - `%AppData%/VideoEditor/`
+   - carpeta `data/` junto al ejecutable o proyecto
 
----
+## 3. Archivos y persistencia
 
-## 3. Inicio rápido
+Ubicaciones relevantes:
+
+- **Base de jobs**: `data/jobs.db`
+- **Configuración y presets persistentes**: `%AppData%/VideoEditor/`
+- **Ruta de herramientas**: archivo JSON de settings bajo `%AppData%/VideoEditor/`
+- **Bundles de diagnóstico**: carpeta elegida por el operador al exportar
+
+## 4. Puesta en marcha inicial
 
 1. Inicie la aplicación.
-2. En panel **Settings**, configure **Tools directory** (opcional si usa PATH).
-3. Pulse **Rescan tools**.
-4. Verifique en **Startup diagnostics**:
-   - ruta de ffmpeg/ffprobe,
-   - versión de ffmpeg,
+2. Abra **Settings**.
+3. Configure la carpeta de herramientas si FFmpeg no está disponible en `PATH`.
+4. Pulse **Rescan tools**.
+5. Verifique en el dashboard o en startup diagnostics:
+   - rutas resueltas de `ffmpeg`, `ffprobe` y `ffplay`,
+   - versión de FFmpeg,
    - resumen de codecs,
-   - métodos de aceleración.
+   - aceleración por hardware detectada.
 
-Si aparece error de herramienta faltante, corrija rutas o PATH y vuelva a escanear.
+Si faltan binarios, corrija la ruta o el `PATH` y vuelva a escanear.
 
----
+## 5. Módulos principales
 
-## 4. Flujo de operación recomendado
+La aplicación se organiza alrededor de estos flujos:
 
-### Paso A: validar entorno
+- Dashboard / diagnostics
+- Settings
+- Preview / Probe
+- Queue
+- Convert
+- otras operaciones soportadas por el motor de comandos (trim, concat, extract audio/video, subtítulos, thumbnails, watermark, HLS, etc.)
 
-- Revise **Startup diagnostics**.
-- Confirme que no hay `BlockingError`.
+## 6. Flujo operativo recomendado
 
-### Paso B: analizar archivo de entrada (probe)
+### Paso 1: verificar el entorno
 
-1. Ingrese `InputPath` en el panel de preview.
-2. Pulse **Probe**.
-3. Verifique estado: cantidad de puntos de seek y duración detectada.
+Antes de procesar archivos, confirme que:
 
-### Paso C: previsualizar
+- `ffmpeg` y `ffprobe` están resueltos,
+- no hay errores bloqueantes en diagnósticos,
+- el snapshot de capacidades se cargó correctamente.
 
-- **Play I/O**: reproduce entre marcadores `In` y `Out`.
-- **Play A/B**: compara dos segmentos (`AStart/AEnd` contra `BStart/BEnd`).
-- **Quick Seek**: salta al punto elegido del combo de seek.
-- **Stop**: detiene la reproducción activa.
+### Paso 2: analizar el archivo de entrada
 
-Controles disponibles:
+Use el flujo de **Probe** o el propio panel **Convert** para analizar el archivo.
 
-- `SubOffset`: offset de subtítulos.
-- `Speed`: factor de velocidad de reproducción.
+El análisis real vía `ffprobe` permite obtener:
 
-### Paso D: ejecutar operación
+- contenedor,
+- duración,
+- tamaño,
+- streams de video,
+- streams de audio,
+- streams de subtítulos,
+- idioma, título y flags por stream,
+- resolución y FPS,
+- sample rate y canales.
 
-Dependiendo del módulo/flujo:
+### Paso 3: previsualizar si hace falta
 
-- Trim
-- Transcode
-- Concat
-- Otras operaciones soportadas por el constructor de comandos
+En **Preview** puede:
 
-Puede ejecutar de forma directa o crear/encolar trabajos.
+- reproducir entre marcadores `In` y `Out`,
+- comparar segmentos A/B,
+- hacer quick seek,
+- ajustar offset de subtítulos,
+- cambiar velocidad de reproducción,
+- detener la reproducción activa.
 
-### Paso E: administrar cola
+### Paso 4: configurar la operación
 
-Operaciones de cola disponibles:
+Según el caso, use la solapa apropiada. Para flujos de transcodificación, use **Convert**, que es el módulo más completo del sistema.
 
-- Crear borrador (draft)
-- Encolar
-- Pausar
-- Reanudar
-- Cancelar
-- Reintentar
+### Paso 5: decidir si el trabajo se ejecuta o se encola
 
-La cola persiste en SQLite y se recupera al reiniciar.
+La aplicación permite:
 
----
+- crear **Draft**,
+- agregar a la **Queue**,
+- reintentar,
+- pausar,
+- reanudar,
+- cancelar.
 
-## 5. Catálogo de operaciones soportadas
+La cola es persistente y se recupera al reiniciar.
 
-El motor de comandos contempla:
+## 7. Guía operativa de Convert
 
-1. Trim
-2. Extract Audio
-3. Extract Video
-4. Convert/Transcode
-5. Concat
-6. Normalize Loudness
-7. Subtitle (burn-in o mux)
-8. Thumbnail / Contact Sheet
-9. Audio Channel Map + Resample
-10. Watermark Overlay (imagen o texto)
-11. Speed / Framerate
-12. Segmentación HLS
+La solapa **Convert** es un panel de transcodificación avanzado. Reemplaza el flujo anterior de “Input + Output + Run” por una operación mucho más completa.
 
----
+### 7.1 Secciones de la solapa Convert
 
-## 6. Diagnóstico y soporte
+Según la versión actual del proyecto, Convert puede incluir estas áreas:
 
-### Exportar bundle de diagnósticos
+- origen / input
+- análisis del archivo con `ffprobe`
+- preset library
+- opciones de video
+- opciones de audio
+- opciones de subtítulos
+- metadata y chapters
+- output / naming
+- validaciones y advisories
+- preview del comando FFmpeg
+- acciones de cola y batch
 
-La cola permite exportar un ZIP con:
+### 7.2 Flujo recomendado en Convert
 
-- `jobs.json`
-- `artifacts/<job-id>.json` por trabajo con artefactos
+#### A. Seleccionar input y output
 
-Úselo para soporte técnico, análisis de fallas o checklist de release.
+- indique archivo de entrada,
+- indique archivo de salida o una carpeta objetivo si usa batch,
+- verifique que input y output no sean el mismo archivo,
+- si cambia contenedor, sincronice la extensión del archivo de salida.
 
-### Datos útiles para depuración
+#### B. Analizar el input
 
-- Código de salida del proceso
-- Comando ejecutado
-- `stdout` / `stderr`
-- Tiempos de inicio y fin
-- Rutas de salida esperadas
+Pulse **Analyze** cuando corresponda. Esto habilita:
 
----
+- validaciones más precisas,
+- detección de streams disponibles,
+- recomendaciones automáticas,
+- presets adaptativos,
+- restricciones de compatibilidad más confiables.
 
-## 7. Estados de trabajo (job lifecycle)
+#### C. Elegir un preset
+
+Puede usar:
+
+- presets built-in,
+- presets guardados por el usuario,
+- presets importados desde JSON.
+
+Presets built-in importantes:
+
+- `Balanced H.264 MP4`
+- `Efficient H.265 MP4`
+- `Stream Copy / Remux`
+- `AV1 1440p 10-bit MKV`
+
+#### D. Ajustar video
+
+Controles habituales:
+
+- modo: `Encode`, `Copy`, `Disable`
+- codec
+- control de tasa: `CRF/CQ` o `Bitrate`
+- `Preset`
+- `Tune`
+- pixel format
+- FPS
+- escala
+- profile / level / GOP
+- 2-pass
+- deinterlace
+- crop
+- pad
+
+Reglas importantes:
+
+- si video está en `Copy`, no se aplican filtros ni cambio de FPS ni scale,
+- `2-pass` debe usarse con control por bitrate,
+- crop/pad/deinterlace requieren video en `Encode`.
+
+#### E. Ajustar audio
+
+Controles habituales:
+
+- modo: `Encode`, `Copy`, `Disable`
+- codec
+- bitrate
+- sample rate
+- channels
+- channel layout
+- normalización simple:
+  - `Loudnorm`
+  - `Dynaudnorm`
+
+Regla importante:
+
+- la normalización requiere audio en `Encode`.
+
+#### F. Ajustar subtítulos
+
+Flujos soportados:
+
+- `Disable`
+- `Copy`
+- `Encode`
+- `BurnIn`
+
+Comportamiento esperado:
+
+- `BurnIn` incrusta el subtítulo sobre el video,
+- `Copy` conserva el stream de subtítulos,
+- `Encode` permite adecuar el codec al contenedor,
+- si no hay subtítulos en el input, las opciones dependientes del stream quedan limitadas.
+
+#### G. Mapear streams
+
+Convert permite trabajar con streams reales del input:
+
+- stream principal de video,
+- stream principal de audio,
+- streams adicionales de audio,
+- streams adicionales de subtítulos.
+
+Use este bloque cuando el archivo tiene múltiples idiomas, comentarios de director, o varias pistas de subtítulos.
+
+#### H. Metadata y chapters
+
+Puede configurar políticas para:
+
+- preservar metadata,
+- eliminar metadata,
+- aplicar overrides de campos como:
+  - `title`
+  - `artist`
+  - `comment`
+- preservar o eliminar chapters.
+
+#### I. Output naming
+
+Convert soporta plantillas de nombre para salida. Según la configuración de la entrega actual, puede usar tokens como:
+
+- `{name}`
+- `{preset}`
+- `{container}`
+- `{vcodec}`
+- `{acodec}`
+- `{height}`
+- `{fps}`
+- `{tag}`
+
+Úselo para:
+
+- evitar nombres manuales repetitivos,
+- identificar codec y resolución en el archivo,
+- generar salidas consistentes en batch.
+
+#### J. Validar el comando
+
+Antes de ejecutar:
+
+- revise el bloque de validaciones,
+- revise los warnings/advisories,
+- revise el preview del comando FFmpeg.
+
+Esto es especialmente importante cuando combina:
+
+- `Copy` con cambios de filtros,
+- contenedor y codec poco compatibles,
+- 2-pass,
+- subtítulos burn-in,
+- escalado con dimensiones no ideales,
+- audio normalization.
+
+#### K. Ejecutar o encolar
+
+Opciones disponibles desde Convert:
+
+- **Create Draft**
+- **Add to Queue**
+- acciones batch equivalentes
+- refresco del estado de cola
+
+Convert también puede mostrar:
+
+- resumen de cola,
+- último job agregado,
+- historial reciente de jobs de Convert.
+
+## 8. Presets de Convert
+
+### 8.1 Presets built-in
+
+Son presets mantenidos por la aplicación. No deben editarse directamente como si fueran presets de usuario.
+
+Ejemplos:
+
+- `Balanced H.264 MP4`
+- `Efficient H.265 MP4`
+- `Stream Copy / Remux`
+- `AV1 1440p 10-bit MKV`
+
+### 8.2 Presets de usuario
+
+Puede:
+
+- guardar la configuración actual,
+- cargar un preset previo,
+- eliminar presets propios,
+- exportarlos a JSON,
+- importarlos desde JSON.
+
+### 8.3 Preset built-in AV1 1440p 10-bit MKV
+
+Este preset se agregó para aproximar un perfil AV1 profesional con esta forma de comando:
+
+```bash
+ffmpeg -i input -c:v libsvtav1 -preset 6 -crf 28 -pix_fmt yuv420p10le -c:a libopus -b:a 128k -y output.mkv
+```
+
+Configuración esperada:
+
+- container: `mkv`
+- video codec: `libsvtav1`
+- preset: `6`
+- CRF: `28`
+- pixel format: `yuv420p10le`
+- audio codec: `libopus`
+- audio bitrate: `128k`
+
+## 9. Batch convert
+
+Si usa la funcionalidad de lote desde Convert:
+
+1. agregue múltiples inputs,
+2. elija una carpeta o naming apropiado,
+3. valide que la plantilla no genere colisiones,
+4. cree drafts o encole el lote,
+5. supervise el resultado desde Queue y el resumen embebido en Convert.
+
+## 10. Cola de trabajos
 
 Estados posibles:
 
@@ -145,61 +361,114 @@ Estados posibles:
 - `Failed`
 - `Cancelled`
 
-Notas:
+Comportamiento relevante:
 
-- Un job en `Running` o `Queued` puede recuperarse como `Queued` tras reinicio.
-- `RetryPolicy` controla número de intentos y demora entre reintentos.
+- trabajos `Running` o `Queued` pueden recuperarse como `Queued` al reiniciar,
+- la política de reintentos controla cantidad y demora,
+- cada job conserva artefactos útiles para soporte.
 
----
+## 11. Diagnóstico y soporte
 
-## 8. Ubicación de archivos y configuración
+La aplicación puede exportar bundles de diagnóstico con:
 
-- **Tool paths**: `%AppData%/VideoEditor/tools.json`
-- **Base de jobs**: `data/jobs.db` (junto al binario)
-- **Diagnósticos**: carpeta elegida por usuario (ZIP timestamp)
+- `jobs.json`
+- artefactos por job
+- comando ejecutado
+- `stdout`
+- `stderr`
+- exit code
+- timestamps
+- rutas de salida esperadas
 
----
+Esto es útil para:
 
-## 9. Problemas comunes y solución
+- soporte,
+- análisis de fallas,
+- validación pre-release,
+- trazabilidad de ejecuciones complejas.
 
-### Problema: “ffmpeg/ffprobe no encontrado”
+## 12. Problemas comunes y solución
 
-Acciones:
-
-1. Configure `Tools directory` correcto.
-2. Pulse **Rescan tools**.
-3. Verifique que los binarios existen físicamente.
-4. Si usa PATH, cierre/reabra sesión o app para refrescar variables.
-
-### Problema: preview no inicia
-
-Acciones:
-
-1. Confirme que `ffplay` esté disponible.
-2. Verifique que `InputPath` exista.
-3. Revise si los marcadores contienen valores válidos (`End > Start`).
-
-### Problema: job falla con exit code != 0
+### Problema: FFmpeg o FFprobe no se detecta
 
 Acciones:
 
-1. Revise artefacto del job (`stderr`).
-2. Valide parámetros de operación y rutas de salida.
-3. Reintente con menor complejidad (por ejemplo, transcode básico).
+1. revise `Settings`,
+2. configure el directorio correcto,
+3. pulse **Rescan tools**,
+4. confirme que los binarios también pueden resolverse desde `PATH` si corresponde.
 
----
+### Problema: no aparecen ciertos codecs en Convert
 
-## 10. Checklist operacional diario
+Causas típicas:
 
-1. Abrir app y verificar diagnósticos.
-2. Cargar archivo y ejecutar probe.
-3. Definir marcadores y validar preview.
-4. Lanzar operación y supervisar cola.
-5. Si falla, exportar diagnóstico y adjuntarlo al reporte.
+- el encoder no existe en la build local de FFmpeg,
+- la lista de capacidades no se recargó todavía.
 
----
+Acciones:
 
-## 11. Build/Test para operadores técnicos
+1. use **Reload capabilities**,
+2. verifique el snapshot de capacidades,
+3. revise si el encoder realmente figura en `ffmpeg -encoders`.
+
+### Problema: un preset no carga como esperaba en otra máquina
+
+Causa típica:
+
+- el preset fue creado en una instalación con capacidades distintas.
+
+Acción:
+
+- cargue el preset y revise los warnings de compatibilidad antes de encolar.
+
+### Problema: 2-pass no funciona
+
+Revise que:
+
+- video esté en `Encode`,
+- el control de tasa sea por `Bitrate`,
+- exista escritura en la ubicación temporal usada por los logs de pass.
+
+### Problema: filtros no tienen efecto
+
+Revise que el stream afectado no esté en `Copy`.
+
+### Problema: subtítulos burn-in falla
+
+Revise que:
+
+- exista stream de subtítulos de origen,
+- video esté en `Encode`,
+- la ruta del input sea válida para el filtro de subtítulos.
+
+### Problema: el archivo de salida no reproduce como esperaba
+
+Revise:
+
+- compatibilidad codec/contenedor,
+- pixel format,
+- FPS,
+- si el flujo fue `Copy` o `Encode`,
+- avisos contextuales mostrados por Convert.
+
+## 13. Recomendaciones de uso
+
+- haga siempre análisis de input antes de una conversión compleja,
+- use presets built-in como punto de partida,
+- valide warnings antes de encolar,
+- use naming templates en flujos batch,
+- guarde presets propios para recetas recurrentes,
+- exporte diagnósticos ante fallas de codec o compatibilidad.
+
+## 14. Guía breve de build y prueba
+
+### En Visual Studio
+
+- abra `VideoEditor.sln`,
+- use `VideoEditor.UI` como startup project,
+- ejecute tests desde `Test Explorer`.
+
+### Por consola
 
 ```bash
 dotnet restore VideoEditor.sln
@@ -207,17 +476,10 @@ dotnet build VideoEditor.sln
 dotnet test VideoEditor.sln
 ```
 
-### Uso correcto en Visual Studio
+## 15. Documentación complementaria
 
-1. Use `VideoEditor.UI` como proyecto de inicio para ejecutar la aplicacion con `F5`.
-2. Ejecute `VideoEditor.Tests` desde `Test Explorer`.
-3. Si ve que `dotnet.exe` termina con codigo `0`, interpretelo como cierre normal del proceso, no como evidencia de que la suite se haya validado.
-
----
-
-## 12. Referencias internas
-
-- `README.md` (visión general técnica)
+- `README.md` — resumen técnico y características del producto
+- `VideoEditor.Tests/README.md` — guía de ejecución de la suite de pruebas
 - `docs/ReleaseChecklist.md`
 - `docs/DesignerIntegrityChecklist.md`
 - `docs/CodingStandards.md`

@@ -6,6 +6,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Include="icon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\VideoEditor.Application\VideoEditor.Application.csproj" />
@@ -21,6 +24,7 @@
     <InstallerArtifactDir>$(MSBuildProjectDirectory)\..\artifacts\installer\</InstallerArtifactDir>
     <InstallerPublishDir>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(TargetFramework)\publish\</InstallerPublishDir>
     <InstallerArchiveName>VideoEditor-$(Configuration)-$(TargetFramework).zip</InstallerArchiveName>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <Target Name="PackageInstaller" DependsOnTargets="Publish">
@@ -28,10 +32,7 @@
     <ItemGroup>
       <PublishedFiles Include="$(InstallerPublishDir)**\*" />
     </ItemGroup>
-    <ZipDirectory SourceDirectory="$(InstallerPublishDir)"
-                  DestinationFile="$(InstallerArtifactDir)$(InstallerArchiveName)"
-                  Overwrite="true"
-                  Condition="Exists('$(InstallerPublishDir)')" />
+    <ZipDirectory SourceDirectory="$(InstallerPublishDir)" DestinationFile="$(InstallerArtifactDir)$(InstallerArchiveName)" Overwrite="true" Condition="Exists('$(InstallerPublishDir)')" />
   </Target>
 
 </Project>

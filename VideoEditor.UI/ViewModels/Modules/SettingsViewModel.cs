@@ -137,8 +137,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
-    public EncodingProfile DefaultProfile { get; set; } =
-        new("Balanced", "libx264", "aac", "mp4", "4M", "192k", "yuv420p", "medium");
+    public ConvertOptions DefaultProfile { get; set; } =
+        ConvertOptions.CreateBalancedMp4H264();
 
     private async Task RescanToolsAsync()
     {
@@ -236,7 +236,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private void SaveSettings()
     {
         ToolPaths = ToolPaths with { ToolsDirectory = string.IsNullOrWhiteSpace(ToolsDirectory) ? null : ToolsDirectory };
-        _settingsPersistence.SaveAppSettings(new AppSettings(ToolPaths, _moduleFlags, _betaCriteria));
+        _settingsPersistence.SaveAppSettings(new AppSettings(ToolPaths, _moduleFlags, _betaCriteria, _settingsPersistence.LoadConvertPresets()));
     }
 
     private void Set<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)

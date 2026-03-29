@@ -8,4 +8,7 @@ public sealed record EncodingProfile(
     string VideoBitrate,
     string AudioBitrate,
     string PixelFormat,
-    string Preset);
+    string Preset)
+{
+    public ConvertOptions ToConvertOptions() => ConvertOptions.FromLegacyProfile(this);
+}

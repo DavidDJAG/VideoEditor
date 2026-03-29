@@ -10,4 +10,5 @@ public sealed record OperationParameters(
     IReadOnlyList<string> AdditionalInputs,
     IReadOnlyDictionary<string, string> Flags,
     EncodingProfile? EncodingProfile,
-    IReadOnlyList<string>? ConcatInputs = null);
+    IReadOnlyList<string>? ConcatInputs = null,
+    ConvertOptions? ConvertOptions = null);

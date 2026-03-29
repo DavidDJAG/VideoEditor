@@ -1,6 +1,6 @@
+using System.IO;
 using VideoEditor.Application.Abstractions;
 using VideoEditor.Domain.Models;
-using System.IO;
 
 namespace VideoEditor.Application.Services;
 
@@ -25,7 +25,7 @@ public sealed class OperationRequestFactory : IOperationRequestFactory
             OperationKind.Convert => new ConvertRequest(
                 parameters.InputPath,
                 RequireOutput(parameters, kind),
-                parameters.EncodingProfile ?? throw new InvalidOperationException("Convert requires EncodingProfile.")),
+                ResolveConvertOptions(parameters)),
             OperationKind.Concat => new ConcatRequest(
                 parameters.ConcatInputs ?? throw new InvalidOperationException("Concat requires ConcatInputs."),
                 RequireOutput(parameters, kind),
@@ -69,6 +69,11 @@ public sealed class OperationRequestFactory : IOperationRequestFactory
 
     private static string RequireOutput(OperationParameters parameters, OperationKind kind)
         => parameters.OutputPath ?? throw new InvalidOperationException($"{kind} requires OutputPath.");
+
+    private static ConvertOptions ResolveConvertOptions(OperationParameters parameters)
+        => parameters.ConvertOptions
+            ?? parameters.EncodingProfile?.ToConvertOptions()
+            ?? throw new InvalidOperationException("Convert requires ConvertOptions or EncodingProfile.");
 
     private static string ResolveAudioCodec(OperationParameters parameters)
     {

@@ -149,45 +149,7 @@
                     </TabItem>
 
                     <TabItem Header="Convert">
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource SectionHeaderTextBlockStyle}" Text="Convert" />
-                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Input" />
-                            <Grid Margin="0,4,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <TextBox Grid.Column="0" Text="{Binding ModulesWorkbenchViewModel.ConvertInputPath, UpdateSourceTrigger=PropertyChanged}" />
-                                <Button Grid.Column="2"
-                                        MinWidth="92"
-                                        Command="{Binding ModulesWorkbenchViewModel.OpenConvertInputCommand}"
-                                        Content="{StaticResource Text.Preview.OpenFile}" />
-                            </Grid>
-                            <TextBlock Margin="0,8,0,0" Style="{StaticResource LabelTextBlockStyle}" Text="Output" />
-                            <Grid Margin="0,4,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <TextBox Grid.Column="0" Text="{Binding ModulesWorkbenchViewModel.ConvertOutputPath, UpdateSourceTrigger=PropertyChanged}" />
-                                <Button Grid.Column="2"
-                                        MinWidth="92"
-                                        Command="{Binding ModulesWorkbenchViewModel.SaveConvertOutputCommand}"
-                                        Content="{StaticResource Text.Common.SaveFile}" />
-                            </Grid>
-                            <Button Margin="0,12,0,0"
-                                    HorizontalAlignment="Left"
-                                    Command="{Binding ModulesWorkbenchViewModel.RunConvertCommand}"
-                                    Content="Run Convert" />
-                            <TextBlock Margin="0,8,0,0"
-                                       Style="{StaticResource StatusInfoTextBlockStyle}"
-                                       TextWrapping="Wrap"
-                                       Text="{Binding ModulesWorkbenchViewModel.ConvertStatus}" />
-                        </StackPanel>
+                        <moduleViews:ConvertView DataContext="{Binding ModulesWorkbenchViewModel}" />
                     </TabItem>
                 </TabControl>
             </Border>

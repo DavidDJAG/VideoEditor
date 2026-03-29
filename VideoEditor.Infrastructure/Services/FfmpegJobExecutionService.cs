@@ -2,6 +2,7 @@ using VideoEditor.Application.Abstractions;
 using VideoEditor.Infrastructure.Execution;
 using VideoEditor.Infrastructure.Toolchain;
 using VideoEditor.Domain.Models;
+using VideoEditor.Application.Services;
 
 namespace VideoEditor.Infrastructure.Services;
 
@@ -32,7 +33,8 @@ public sealed class FfmpegJobExecutionService : IJobExecutionService
         var startedAt = DateTimeOffset.UtcNow;
         OperationCatalog.TryParseLegacyOperation(job.Operation, out var kind);
         var request = _operationRequestFactory.Create(kind, job.Parameters);
-        var command = _commandBuilder.Build(request);
+        var commands = _commandBuilder.BuildCommandSequence(request);
+        var command = string.Join($"{Environment.NewLine}{Environment.NewLine}", commands);
 
         var toolPaths = _toolchainResolver.ResolvePathsOrThrow();
         if (request is ConcatRequest concat)
@@ -56,8 +58,38 @@ public sealed class FfmpegJobExecutionService : IJobExecutionService
             }
         }
 
-        var result = await _processExecutor.RunAsync(toolPaths.FfmpegPath, command, cancellationToken);
+        ProcessExecutionResult? lastResult = null;
+        var stdout = new List<string>();
+        var stderr = new List<string>();
+
+        try
+        {
+            foreach (var sequenceCommand in commands)
+            {
+                lastResult = await _processExecutor.RunAsync(toolPaths.FfmpegPath, sequenceCommand, cancellationToken);
+                if (!string.IsNullOrWhiteSpace(lastResult.StandardOutput))
+                {
+                    stdout.Add(lastResult.StandardOutput);
+                }
+
+                if (!string.IsNullOrWhiteSpace(lastResult.StandardError))
+                {
+                    stderr.Add(lastResult.StandardError);
+                }
+
+                if (lastResult.ExitCode != 0)
+                {
+                    break;
+                }
+            }
+        }
+        finally
+        {
+            CleanupTwoPassArtifacts(request);
+        }
+
         var finishedAt = DateTimeOffset.UtcNow;
+        lastResult ??= new ProcessExecutionResult(0, string.Empty, string.Empty);
 
         var outputs = string.IsNullOrWhiteSpace(job.Parameters.OutputPath)
             ? Array.Empty<string>()
@@ -66,11 +98,33 @@ public sealed class FfmpegJobExecutionService : IJobExecutionService
         return new JobExecutionArtifact(
             job.Id,
             $"{toolPaths.FfmpegPath} {command}",
-            result.StandardOutput,
-            result.StandardError,
-            result.ExitCode,
+            string.Join(Environment.NewLine + Environment.NewLine, stdout),
+            string.Join(Environment.NewLine + Environment.NewLine, stderr),
+            lastResult.ExitCode,
             startedAt,
             finishedAt,
             outputs);
+    }
+
+    private static void CleanupTwoPassArtifacts(IFfmpegOperationRequest request)
+    {
+        if (request is not ConvertRequest { ConvertOptions.Video.PassMode: VideoPassMode.TwoPass } convert)
+        {
+            return;
+        }
+
+        foreach (var path in CommandBuilder.GetTwoPassLogArtifacts(convert.OutputPath))
+        {
+            try
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+            catch
+            {
+            }
+        }
     }
 }

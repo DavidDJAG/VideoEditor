@@ -11,9 +11,9 @@ public sealed class FfprobeJsonParserTests
             {
               "format": { "format_name": "matroska,webm", "duration": "2.5", "size": "2048" },
               "streams": [
-                { "codec_type": "video", "width": 1920, "height": 1080, "avg_frame_rate": "60000/1001" },
-                { "codec_type": "audio", "sample_rate": "44100", "channels": 2 },
-                { "codec_type": "subtitle" }
+                { "index": 0, "codec_type": "video", "codec_name": "h264", "width": 1920, "height": 1080, "avg_frame_rate": "60000/1001" },
+                { "index": 1, "codec_type": "audio", "codec_name": "aac", "sample_rate": "44100", "channels": 2, "channel_layout": "stereo", "tags": { "language": "eng" } },
+                { "index": 2, "codec_type": "subtitle", "codec_name": "subrip", "tags": { "language": "spa", "title": "Full captions" }, "disposition": { "default": 1, "forced": 0 } }
               ]
             }
             """;
@@ -23,6 +23,8 @@ public sealed class FfprobeJsonParserTests
         Assert.Equal(TimeSpan.FromSeconds(2.5), result.Duration);
         Assert.Equal(2048, result.SizeBytes);
         Assert.Equal("matroska,webm", result.Container);
+        Assert.Equal("h264", result.VideoCodec);
+        Assert.Equal("aac", result.AudioCodec);
         Assert.Equal(1, result.VideoStreamCount);
         Assert.Equal(1, result.AudioStreamCount);
         Assert.Equal(1, result.SubtitleStreamCount);
@@ -31,6 +33,12 @@ public sealed class FfprobeJsonParserTests
         Assert.Equal(60000d / 1001d, result.FrameRate);
         Assert.Equal(44100, result.AudioSampleRate);
         Assert.Equal(2, result.AudioChannels);
+        Assert.Equal("stereo", result.AudioChannelLayout);
+        Assert.Equal(3, result.StreamInfos.Count);
+        Assert.Equal(0, result.StreamInfos[0].TypeIndex);
+        Assert.Equal("eng", result.StreamInfos[1].Language);
+        Assert.Equal("Full captions", result.StreamInfos[2].Title);
+        Assert.True(result.StreamInfos[2].IsDefault);
     }
 
     [Fact]

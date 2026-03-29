@@ -55,15 +55,261 @@ public sealed record ExtractVideoRequest(string InputPath, string OutputPath, st
     }
 }
 
-public sealed record ConvertRequest(string InputPath, string OutputPath, EncodingProfile EncodingProfile) : FfmpegOperationRequest
+public sealed record ConvertRequest(string InputPath, string OutputPath, ConvertOptions ConvertOptions) : FfmpegOperationRequest
 {
+    public ConvertRequest(string inputPath, string outputPath, EncodingProfile encodingProfile)
+        : this(inputPath, outputPath, encodingProfile.ToConvertOptions())
+    {
+    }
+
     public override IReadOnlyList<string> Validate()
     {
         var errors = new List<string>();
         Require(!string.IsNullOrWhiteSpace(InputPath), "InputPath is required.", errors);
         Require(!string.IsNullOrWhiteSpace(OutputPath), "OutputPath is required.", errors);
-        Require(EncodingProfile is not null, "EncodingProfile is required.", errors);
+        Require(!string.Equals(InputPath, OutputPath, StringComparison.OrdinalIgnoreCase), "InputPath and OutputPath must be different.", errors);
+        Require(ConvertOptions is not null, "ConvertOptions is required.", errors);
+
+        if (ConvertOptions is null)
+        {
+            return errors;
+        }
+
+        ValidateConvertOptions(ConvertOptions.Normalize(), errors);
         return errors;
+    }
+
+    private static void ValidateConvertOptions(ConvertOptions options, List<string> errors)
+    {
+        Require(!string.IsNullOrWhiteSpace(options.Container), "Container is required.", errors);
+        Require(options.Video.Mode != StreamProcessingMode.Disable || options.Audio.Mode != StreamProcessingMode.Disable, "At least one stream must remain enabled.", errors);
+
+        ValidateVideo(options.Video, errors);
+        ValidateAudio(options.Audio, errors);
+        ValidateSubtitle(options.Subtitle ?? SubtitleOptions.Disabled(), options.Video, errors);
+        ValidateMetadata(options.Metadata ?? MetadataOptions.CreateDefault(), errors);
+    }
+
+    private static void ValidateVideo(VideoEncodingOptions video, List<string> errors)
+    {
+        var cropRequested = video.CropX.HasValue || video.CropY.HasValue || video.CropWidth.HasValue || video.CropHeight.HasValue;
+
+        if (video.Mode != StreamProcessingMode.Encode)
+        {
+            Require(video.PassMode == VideoPassMode.SinglePass, "Two-pass video encoding can only be enabled when video mode is Encode.", errors);
+            Require(video.DeinterlaceMode == VideoDeinterlaceMode.Off, "Deinterlacing can only be enabled when video mode is Encode.", errors);
+            Require(!cropRequested, "Crop can only be enabled when video mode is Encode.", errors);
+            Require(!video.PadToSize, "Pad can only be enabled when video mode is Encode.", errors);
+        }
+
+        if (video.Mode == StreamProcessingMode.Disable)
+        {
+            return;
+        }
+
+        if (video.Mode == StreamProcessingMode.Copy)
+        {
+            return;
+        }
+
+        Require(!string.IsNullOrWhiteSpace(video.Codec), "Video codec is required when video encoding is enabled.", errors);
+
+        switch (video.RateControlMode)
+        {
+            case VideoRateControlMode.Bitrate:
+                Require(!string.IsNullOrWhiteSpace(video.Bitrate), "Video bitrate is required when rate control mode is Bitrate.", errors);
+                break;
+            case VideoRateControlMode.ConstantQuality:
+                Require(video.Crf.HasValue, "CRF is required when rate control mode is ConstantQuality.", errors);
+                if (video.Crf.HasValue)
+                {
+                    Require(video.Crf.Value is >= 0 and <= 63, "CRF must be between 0 and 63.", errors);
+                }
+                break;
+        }
+
+        if (video.FrameRateMode == FrameRateMode.SetOutput)
+        {
+            Require(video.FrameRate.HasValue && video.FrameRate.Value > 0, "FrameRate must be greater than 0 when output frame rate is set.", errors);
+        }
+
+        if (video.ScaleMode == ScaleMode.SetOutput)
+        {
+            Require((video.Width.HasValue && video.Width.Value > 0) || (video.Height.HasValue && video.Height.Value > 0), "Width or Height must be greater than 0 when scaling is enabled.", errors);
+            if (video.Width.HasValue)
+            {
+                Require(video.Width.Value > 0, "Width must be greater than 0 when provided.", errors);
+            }
+
+            if (video.Height.HasValue)
+            {
+                Require(video.Height.Value > 0, "Height must be greater than 0 when provided.", errors);
+            }
+        }
+
+        if (video.GopSize.HasValue)
+        {
+            Require(video.GopSize.Value > 0, "GopSize must be greater than 0 when provided.", errors);
+        }
+
+        if (video.SourceStreamIndex.HasValue)
+        {
+            Require(video.SourceStreamIndex.Value >= 0, "Video source stream index must be greater than or equal to 0 when provided.", errors);
+        }
+
+        if (video.PassMode == VideoPassMode.TwoPass)
+        {
+            Require(video.RateControlMode == VideoRateControlMode.Bitrate, "Two-pass video encoding requires rate control mode Bitrate.", errors);
+            Require(!string.IsNullOrWhiteSpace(video.Bitrate), "Two-pass video encoding requires a target video bitrate.", errors);
+        }
+
+        if (video.DeinterlaceMode != VideoDeinterlaceMode.Off)
+        {
+            Require(video.Mode == StreamProcessingMode.Encode, "Deinterlacing can only be enabled when video mode is Encode.", errors);
+        }
+
+        if (cropRequested)
+        {
+            Require(video.Mode == StreamProcessingMode.Encode, "Crop can only be enabled when video mode is Encode.", errors);
+            Require(video.CropWidth.HasValue && video.CropWidth.Value > 0, "CropWidth must be greater than 0 when crop is enabled.", errors);
+            Require(video.CropHeight.HasValue && video.CropHeight.Value > 0, "CropHeight must be greater than 0 when crop is enabled.", errors);
+            if (video.CropX.HasValue)
+            {
+                Require(video.CropX.Value >= 0, "CropX must be greater than or equal to 0 when provided.", errors);
+            }
+
+            if (video.CropY.HasValue)
+            {
+                Require(video.CropY.Value >= 0, "CropY must be greater than or equal to 0 when provided.", errors);
+            }
+        }
+
+        if (video.PadToSize)
+        {
+            Require(video.Mode == StreamProcessingMode.Encode, "Pad can only be enabled when video mode is Encode.", errors);
+            Require(video.PadWidth.HasValue && video.PadWidth.Value > 0, "PadWidth must be greater than 0 when pad is enabled.", errors);
+            Require(video.PadHeight.HasValue && video.PadHeight.Value > 0, "PadHeight must be greater than 0 when pad is enabled.", errors);
+            if (video.PadX.HasValue)
+            {
+                Require(video.PadX.Value >= 0, "PadX must be greater than or equal to 0 when provided.", errors);
+            }
+
+            if (video.PadY.HasValue)
+            {
+                Require(video.PadY.Value >= 0, "PadY must be greater than or equal to 0 when provided.", errors);
+            }
+
+            if (video.ScaleMode == ScaleMode.SetOutput)
+            {
+                if (video.Width.HasValue && video.PadWidth.HasValue)
+                {
+                    Require(video.PadWidth.Value >= video.Width.Value, "PadWidth must be greater than or equal to the scaled width.", errors);
+                }
+
+                if (video.Height.HasValue && video.PadHeight.HasValue)
+                {
+                    Require(video.PadHeight.Value >= video.Height.Value, "PadHeight must be greater than or equal to the scaled height.", errors);
+                }
+            }
+        }
+    }
+
+    private static void ValidateAudio(AudioEncodingOptions audio, List<string> errors)
+    {
+        if (audio.Mode != StreamProcessingMode.Encode)
+        {
+            Require(audio.NormalizationMode == AudioNormalizationMode.None, "Audio normalization requires audio mode Encode.", errors);
+        }
+
+        if (audio.SourceStreamIndex.HasValue)
+        {
+            Require(audio.SourceStreamIndex.Value >= 0, "Audio source stream index must be greater than or equal to 0 when provided.", errors);
+        }
+
+        ValidateAdditionalStreamIndexes(audio.AdditionalSourceStreamIndexes, "Audio additional source stream index", errors);
+
+        if (audio.Mode == StreamProcessingMode.Disable)
+        {
+            return;
+        }
+
+        if (audio.Mode == StreamProcessingMode.Copy)
+        {
+            return;
+        }
+
+        Require(!string.IsNullOrWhiteSpace(audio.Codec), "Audio codec is required when audio encoding is enabled.", errors);
+
+        if (audio.SampleRate.HasValue)
+        {
+            Require(audio.SampleRate.Value > 0, "SampleRate must be greater than 0 when provided.", errors);
+        }
+
+        if (audio.Channels.HasValue)
+        {
+            Require(audio.Channels.Value > 0, "Channels must be greater than 0 when provided.", errors);
+        }
+
+        if (audio.NormalizationMode != AudioNormalizationMode.None)
+        {
+            Require(audio.Mode == StreamProcessingMode.Encode, "Audio normalization requires audio mode Encode.", errors);
+        }
+
+        if (audio.NormalizationMode == AudioNormalizationMode.Loudnorm)
+        {
+            if (audio.LoudnessTarget.HasValue)
+            {
+                Require(audio.LoudnessTarget.Value <= 0, "LoudnessTarget should be <= 0 LUFS when provided.", errors);
+            }
+
+            if (audio.TruePeak.HasValue)
+            {
+                Require(audio.TruePeak.Value <= 0, "TruePeak should be <= 0 dBTP when provided.", errors);
+            }
+
+            if (audio.LoudnessRange.HasValue)
+            {
+                Require(audio.LoudnessRange.Value > 0, "LoudnessRange must be greater than 0 when provided.", errors);
+            }
+        }
+    }
+
+    private static void ValidateSubtitle(SubtitleOptions subtitle, VideoEncodingOptions video, List<string> errors)
+    {
+        if (subtitle.SourceStreamIndex.HasValue)
+        {
+            Require(subtitle.SourceStreamIndex.Value >= 0, "Subtitle source stream index must be greater than or equal to 0 when provided.", errors);
+        }
+
+        ValidateAdditionalStreamIndexes(subtitle.AdditionalSourceStreamIndexes, "Subtitle additional source stream index", errors);
+
+        if (subtitle.Mode == SubtitleProcessingMode.Encode)
+        {
+            Require(!string.IsNullOrWhiteSpace(subtitle.Codec), "Subtitle codec is required when subtitle mode is Encode.", errors);
+        }
+
+        if (subtitle.Mode == SubtitleProcessingMode.BurnIn)
+        {
+            Require(video.Mode == StreamProcessingMode.Encode, "Burn-in subtitles require video mode Encode.", errors);
+        }
+    }
+
+    private static void ValidateAdditionalStreamIndexes(IReadOnlyList<int>? indexes, string label, List<string> errors)
+    {
+        if (indexes is null)
+        {
+            return;
+        }
+
+        foreach (var index in indexes)
+        {
+            Require(index >= 0, $"{label} must be greater than or equal to 0 when provided.", errors);
+        }
+    }
+
+    private static void ValidateMetadata(MetadataOptions metadata, List<string> errors)
+    {
+        _ = metadata;
     }
 }
 

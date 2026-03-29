@@ -6,6 +6,8 @@ public interface ICommandBuilder
 {
     string Build(IFfmpegOperationRequest request);
 
+    IReadOnlyList<string> BuildCommandSequence(IFfmpegOperationRequest request);
+
     string BuildTrim(OperationParameters parameters);
 
     string BuildTranscode(OperationParameters parameters);
